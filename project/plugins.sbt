@@ -5,3 +5,6 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.15")
 // http://www.foundweekends.org/giter8/scaffolding.html
 // sbt "g8Scaffold form"
 addSbtPlugin("org.foundweekends.giter8" % "sbt-giter8-scaffold" % "0.13.1")
+
+// formats code
+addSbtPlugin("com.lightbend.sbt" % "sbt-java-formatter" % "0.6.0")
