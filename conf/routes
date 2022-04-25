@@ -5,6 +5,7 @@
 # An example controller showing a sample home page
 GET     /            dot.com.repository.controllers.UserController.modifyUser(id: String)
 GET     /get         dot.com.repository.controllers.UserController.get(id: String)
+GET     /find        dot.com.repository.controllers.UserController.findByValue(field: String, value: String)
 GET     /save        dot.com.repository.controllers.UserController.save()
 
 GET     /init        dot.com.repository.controllers.InitController.init()

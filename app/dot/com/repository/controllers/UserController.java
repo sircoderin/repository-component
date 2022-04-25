@@ -1,15 +1,12 @@
 package dot.com.repository.controllers;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import dot.com.repository.enums.UserRole;
 import dot.com.repository.models.User;
 import dot.com.repository.repository.UserRepository;
-import dot.com.repository.enums.UserRole;
+import dot.com.repository.views.html.index;
 import javax.inject.Inject;
 import play.mvc.Controller;
 import play.mvc.Result;
-import dot.com.repository.views.html.index;
 
 public class UserController extends Controller {
 
@@ -27,7 +24,7 @@ public class UserController extends Controller {
 
   public Result save() {
     final User user = new User();
-    user.setId("asda2");
+    user.setId("asda1");
     user.setEmail("none@yahoo.com");
     user.setUserName("john");
     user.setRole(UserRole.ADMIN);
@@ -36,14 +33,11 @@ public class UserController extends Controller {
     return ok(index.render(user));
   }
 
-  public Result get(String id) {
-    return ok(userRepository.findById(id).toString());
+  public Result findByValue(String field, String value) {
+    return ok(userRepository.findByField(field, value).toString());
   }
 
-  public String getSchema(Class<?> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {
-    SchemaGenerator generator = new SchemaGenerator(schemaGeneratorConfig);
-    ObjectNode jsonSchemaAsObjectNode = generator.generateSchema(entityClass);
-    jsonSchemaAsObjectNode.remove("$schema");
-    return jsonSchemaAsObjectNode.toPrettyString();
+  public Result get(String id) {
+    return ok(userRepository.findById(id).toString());
   }
 }

@@ -2,6 +2,7 @@ package dot.com.repository.repository;
 
 import dot.com.repository.models.User;
 import it.unifi.cerm.playmorphia.PlayMorphia;
+import java.util.List;
 import javax.inject.Inject;
 
 public class UserRepository {
@@ -17,8 +18,8 @@ public class UserRepository {
     return morphia.datastore().createQuery(User.class).field("_id").equal(id).first();
   }
 
-  public User findByField(String field, String value) {
-    return morphia.datastore().createQuery(User.class).field(field).equal(value).first();
+  public List<User> findByField(String field, String value) {
+    return morphia.datastore().createQuery(User.class).field(field).equal(value).find().toList();
   }
 
   public void save(User user) {
