@@ -1,4 +1,4 @@
-package controllers.mongoConfiguration;
+package mongo;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
@@ -15,10 +15,12 @@ public class MyMongoClientFactory extends MongoClientFactory {
     this.config = config;
   }
 
-  public MongoClient createClient() throws Exception {
+  @Override
+  public MongoClient createClient() {
     return new MongoClient(List.of(new ServerAddress("localhost", 27017)));
   }
 
+  @Override
   public String getDBName() {
     return config.getString("playmorphia.database");
   }

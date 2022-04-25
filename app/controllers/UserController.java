@@ -51,24 +51,23 @@ public class UserController extends Controller {
   public Result createCollection() {
 
     var module =
-            SimpleTypeModule.forPrimitiveAndAdditionalTypes()
-                    .withIntegerType(Byte.class, "integer");
+        SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
 
     var configBuilder =
-            new JsonComponentSchemaGeneratorConfigBuilder()
-                    .withModule(module)
-                    .withConstraints()
-                    .withInline();
+        new JsonComponentSchemaGeneratorConfigBuilder()
+            .withModule(module)
+            .withConstraints()
+            .withInline();
     var schemaGeneratorConfig = configBuilder.build();
     var schema = getSchema(User.class, schemaGeneratorConfig);
 
     try (final MongoClient mongoClient = new MongoClient()) {
       MongoDatabase database = mongoClient.getDatabase("myDb");
       ValidationOptions collOptions =
-              new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
+          new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
       database.createCollection(
-              "User", new CreateCollectionOptions().validationOptions(collOptions));
+          "User", new CreateCollectionOptions().validationOptions(collOptions));
     }
     return ok(schema);
   }
