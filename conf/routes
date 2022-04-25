@@ -3,10 +3,11 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.UserController.modifyUser(id: String)
-GET     /get                       controllers.UserController.get(id: String)
-GET     /save                       controllers.UserController.save()
-GET     /createCollection           controllers.UserController.createCollection()
+GET     /            dot.com.controllers.UserController.modifyUser(id: String)
+GET     /get         dot.com.controllers.UserController.get(id: String)
+GET     /save        dot.com.controllers.UserController.save()
+
+GET     /init        dot.com.controllers.InitController.init()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

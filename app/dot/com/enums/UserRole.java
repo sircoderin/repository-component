@@ -1,4 +1,4 @@
-package enums;
+package dot.com.enums;
 
 public enum UserRole {
   USER("USER"),

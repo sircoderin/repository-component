@@ -1,4 +1,4 @@
-package constants;
+package dot.com.constants;
 
 public class Patterns {
 

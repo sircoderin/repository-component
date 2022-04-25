@@ -1,4 +1,4 @@
-package controllers;
+package dot.com.controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -6,50 +6,26 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ValidationOptions;
-import enums.UserRole;
-import javax.inject.Inject;
-import models.User;
+import dot.com.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
+import dot.com.models.User;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
-import repository.UserRepository;
-import schema.JsonComponentSchemaGeneratorConfigBuilder;
-import views.html.index;
 
-public class UserController extends Controller {
+public class InitController extends Controller {
 
-  private final UserRepository userRepository;
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  @Inject
-  public UserController(UserRepository user) {
-    this.userRepository = user;
+  public Result init() {
+    createCollection();
+    return ok("init");
   }
 
-  public Result modifyUser(String id) {
-    User user = userRepository.findById(id);
-    return ok(index.render(user));
-  }
-
-  public Result save() {
-    final User user = new User();
-    user.setId("asda2");
-    user.setEmail("none@yahoo.com");
-    user.setUserName("john");
-    user.setRole(UserRole.ADMIN);
-    user.setPassword("pass");
-    userRepository.save(user);
-    return ok(index.render(user));
-  }
-
-  public Result get(String id) {
-    return ok(userRepository.findById(id).toString());
-  }
-
-  public Result createCollection() {
-
+  public void createCollection() {
     var module =
         SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
 
@@ -66,10 +42,11 @@ public class UserController extends Controller {
       ValidationOptions collOptions =
           new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
-      database.createCollection(
-          "User", new CreateCollectionOptions().validationOptions(collOptions));
+      //      database.createCollection(
+      //          "User", new CreateCollectionOptions().validationOptions(collOptions));
+
+      logger.debug("{}", schema);
     }
-    return ok(schema);
   }
 
   public String getSchema(Class<?> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {

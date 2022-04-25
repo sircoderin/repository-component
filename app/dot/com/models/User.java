@@ -1,8 +1,8 @@
-package models;
+package dot.com.models;
 
-import constants.Patterns;
+import dot.com.constants.Patterns;
 import dev.morphia.annotations.Entity;
-import enums.UserRole;
+import dot.com.enums.UserRole;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

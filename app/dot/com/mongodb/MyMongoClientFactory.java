@@ -1,4 +1,4 @@
-package mongo;
+package dot.com.mongodb;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
