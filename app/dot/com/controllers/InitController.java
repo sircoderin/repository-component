@@ -6,10 +6,11 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ValidationOptions;
-import dot.com.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
 import dot.com.models.User;
+import dot.com.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,8 @@ public class InitController extends Controller {
       ValidationOptions collOptions =
           new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
-      //      database.createCollection(
-      //          "User", new CreateCollectionOptions().validationOptions(collOptions));
+      database.createCollection(
+          "User", new CreateCollectionOptions().validationOptions(collOptions));
 
       logger.debug("{}", schema);
     }
