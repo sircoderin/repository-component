@@ -1,4 +1,4 @@
-package dot.com.controllers;
+package dot.com.repository.controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -9,8 +9,8 @@ import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ValidationOptions;
 import com.typesafe.config.Config;
-import dot.com.models.User;
-import dot.com.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
+import dot.com.repository.models.User;
+import dot.com.repository.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.slf4j.Logger;

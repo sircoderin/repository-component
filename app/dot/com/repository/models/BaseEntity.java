@@ -1,4 +1,4 @@
-package dot.com.models;
+package dot.com.repository.models;
 
 import com.google.gson.Gson;
 import dev.morphia.annotations.Id;

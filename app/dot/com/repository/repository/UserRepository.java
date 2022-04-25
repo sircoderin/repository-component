@@ -1,8 +1,8 @@
-package dot.com.repository;
+package dot.com.repository.repository;
 
+import dot.com.repository.models.User;
 import it.unifi.cerm.playmorphia.PlayMorphia;
 import javax.inject.Inject;
-import dot.com.models.User;
 
 public class UserRepository {
 

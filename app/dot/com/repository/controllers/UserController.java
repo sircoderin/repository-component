@@ -1,15 +1,15 @@
-package dot.com.controllers;
+package dot.com.repository.controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import dot.com.models.User;
-import dot.com.repository.UserRepository;
-import dot.com.enums.UserRole;
+import dot.com.repository.models.User;
+import dot.com.repository.repository.UserRepository;
+import dot.com.repository.enums.UserRole;
 import javax.inject.Inject;
 import play.mvc.Controller;
 import play.mvc.Result;
-import dot.com.views.html.index;
+import dot.com.repository.views.html.index;
 
 public class UserController extends Controller {
 
