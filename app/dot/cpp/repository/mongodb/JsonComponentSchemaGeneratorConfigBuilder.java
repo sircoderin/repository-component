@@ -1,4 +1,4 @@
-package dot.com.repository.mongodb;
+package dot.cpp.repository.mongodb;
 
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.Module;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.MatchesPattern;
 import javax.annotation.Nonnull;
-import dot.com.repository.models.BaseEntity;
+import dot.cpp.repository.models.BaseEntity;
 
 public class JsonComponentSchemaGeneratorConfigBuilder {
   private final SchemaGeneratorConfigBuilder schemaGeneratorConfigBuilder;

@@ -1,4 +1,4 @@
-package dot.com.repository.controllers;
+package dot.cpp.repository.controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -10,10 +10,10 @@ import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ValidationOptions;
 import com.typesafe.config.Config;
-import dot.com.repository.models.BaseEntity;
-import dot.com.repository.models.Customer;
-import dot.com.repository.models.User;
-import dot.com.repository.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
+import dot.cpp.repository.models.BaseEntity;
+import dot.cpp.repository.models.Customer;
+import dot.cpp.repository.models.User;
+import dot.cpp.repository.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,25 +49,26 @@ public class InitController extends Controller {
     }
   }
 
-  private void createCollections(List<Class<? extends BaseEntity>> entities, MongoDatabase database) {
+  private void createCollections(
+      List<Class<? extends BaseEntity>> entities, MongoDatabase database) {
     final var schemaGeneratorConfig = getSchemaGeneratorConfig();
 
     entities.forEach(
-      entity -> {
-        var schema = getSchema(entity, schemaGeneratorConfig);
-        var validationOptions =
-          new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
+        entity -> {
+          var schema = getSchema(entity, schemaGeneratorConfig);
+          var validationOptions =
+              new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
-        if (isCollectionInDatabase(entity.getSimpleName(), database)) {
-          // update
-          logger.debug("already exists");
-        } else
-          database.createCollection(
-            entity.getSimpleName(),
-            new CreateCollectionOptions().validationOptions(validationOptions));
+          if (isCollectionInDatabase(entity.getSimpleName(), database)) {
+            // update
+            logger.debug("already exists");
+          } else
+            database.createCollection(
+                entity.getSimpleName(),
+                new CreateCollectionOptions().validationOptions(validationOptions));
 
-        logger.debug("{}", schema);
-      });
+          logger.debug("{}", schema);
+        });
   }
 
   public boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
@@ -78,12 +79,12 @@ public class InitController extends Controller {
 
   private SchemaGeneratorConfig getSchemaGeneratorConfig() {
     var module =
-      SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
+        SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
     var configBuilder =
-      new JsonComponentSchemaGeneratorConfigBuilder()
-        .withModule(module)
-        .withConstraints()
-        .withInline();
+        new JsonComponentSchemaGeneratorConfigBuilder()
+            .withModule(module)
+            .withConstraints()
+            .withInline();
     return configBuilder.build();
   }
 

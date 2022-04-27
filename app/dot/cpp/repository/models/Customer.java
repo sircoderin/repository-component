@@ -1,4 +1,4 @@
-package dot.com.repository.models;
+package dot.cpp.repository.models;
 
 import dev.morphia.annotations.Entity;
 

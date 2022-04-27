@@ -1,6 +1,6 @@
-package dot.com.repository.repository;
+package dot.cpp.repository.repository;
 
-import dot.com.repository.models.BaseEntity;
+import dot.cpp.repository.models.BaseEntity;
 import it.unifi.cerm.playmorphia.PlayMorphia;
 import java.util.List;
 import javax.inject.Inject;

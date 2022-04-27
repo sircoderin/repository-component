@@ -1,4 +1,4 @@
-package dot.com.repository.enums;
+package dot.cpp.repository.enums;
 
 public enum UserRole {
   USER("USER"),

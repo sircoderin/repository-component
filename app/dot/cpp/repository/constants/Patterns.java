@@ -1,4 +1,4 @@
-package dot.com.repository.constants;
+package dot.cpp.repository.constants;
 
 public class Patterns {
 

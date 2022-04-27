@@ -1,5 +1,5 @@
 name := """repository-component"""
-organization := "dot.com"
+organization := "dot.cpp"
 
 version := "1.0-SNAPSHOT"
 

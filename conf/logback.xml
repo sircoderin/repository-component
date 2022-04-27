@@ -10,7 +10,7 @@
     </appender>
 
     <logger name="play" level="INFO"/>
-    <logger name="dot.com" level="DEBUG"/>
+    <logger name="dot.cpp" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

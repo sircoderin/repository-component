@@ -1,4 +1,4 @@
-package dot.com.repository.mongodb;
+package dot.cpp.repository.mongodb;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;

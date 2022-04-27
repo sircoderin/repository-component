@@ -1,8 +1,8 @@
-package dot.com.repository.models;
+package dot.cpp.repository.models;
 
-import dot.com.repository.constants.Patterns;
+import dot.cpp.repository.constants.Patterns;
 import dev.morphia.annotations.Entity;
-import dot.com.repository.enums.UserRole;
+import dot.cpp.repository.enums.UserRole;
 import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
