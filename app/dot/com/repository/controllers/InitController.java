@@ -5,18 +5,24 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ValidationOptions;
 import com.typesafe.config.Config;
+import dot.com.repository.models.BaseEntity;
+import dot.com.repository.models.Customer;
 import dot.com.repository.models.User;
 import dot.com.repository.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
-import javax.inject.Inject;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InitController extends Controller {
 
@@ -29,35 +35,55 @@ public class InitController extends Controller {
   }
 
   public Result init() {
-    createCollection();
+    createDatabase();
     return ok("init");
   }
 
-  public void createCollection() {
-
-    final var schemaGeneratorConfig = getSchemaGeneratorConfig();
-    final var schema = getSchema(User.class, schemaGeneratorConfig);
-
+  public void createDatabase() {
     try (final MongoClient mongoClient = new MongoClient()) {
       var database = mongoClient.getDatabase(config.getString("db.name"));
-      var validationOptions =
+
+      var entities = List.of(User.class, Customer.class);
+
+      createCollections(entities, database);
+    }
+  }
+
+  private void createCollections(List<Class<? extends BaseEntity>> entities, MongoDatabase database) {
+    final var schemaGeneratorConfig = getSchemaGeneratorConfig();
+
+    entities.forEach(
+      entity -> {
+        var schema = getSchema(entity, schemaGeneratorConfig);
+        var validationOptions =
           new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
-      database.createCollection(
-          "User", new CreateCollectionOptions().validationOptions(validationOptions));
+        if (isCollectionInDatabase(entity.getSimpleName(), database)) {
+          // update
+          logger.debug("already exists");
+        } else
+          database.createCollection(
+            entity.getSimpleName(),
+            new CreateCollectionOptions().validationOptions(validationOptions));
 
-      logger.debug("{}", schema);
-    }
+        logger.debug("{}", schema);
+      });
+  }
+
+  public boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
+    var collectionNames = database.listCollectionNames();
+
+    return collectionNames.into(new ArrayList<>()).contains(collectionName);
   }
 
   private SchemaGeneratorConfig getSchemaGeneratorConfig() {
     var module =
-        SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
+      SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
     var configBuilder =
-        new JsonComponentSchemaGeneratorConfigBuilder()
-            .withModule(module)
-            .withConstraints()
-            .withInline();
+      new JsonComponentSchemaGeneratorConfigBuilder()
+        .withModule(module)
+        .withConstraints()
+        .withInline();
     return configBuilder.build();
   }
 
