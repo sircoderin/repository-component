@@ -14,7 +14,10 @@ libraryDependencies ++= Seq(
   "com.github.victools" % "jsonschema-generator" % "4.16.0",
   "com.github.victools" % "jsonschema-module-jackson" % "4.16.0",
   "com.github.victools" % "jsonschema-module-javax-validation" % "4.16.0",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4",
-  "com.google.code.gson" % "gson" % "2.9.0"
+  "com.google.code.gson" % "gson" % "2.8.2"
 )
 
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", _*) => MergeStrategy.discard
+  case _ => MergeStrategy.first
+}
