@@ -1,7 +1,6 @@
 package dot.cpp.repository.models;
 
 import dev.morphia.annotations.Entity;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
