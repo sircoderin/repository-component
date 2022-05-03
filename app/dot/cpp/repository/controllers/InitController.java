@@ -60,13 +60,16 @@ public class InitController extends Controller {
               new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
           if (isCollectionInDatabase(entity.getSimpleName(), database)) {
-            // update
+            database.runCommand(
+                new Document("collMod", entity.getSimpleName())
+                    .append("validator", Document.parse(schema))
+                    .append("validationLevel", "strict"));
+            // defaults are added by setting the variable in its respective class with an initial value
             logger.debug("already exists");
           } else
             database.createCollection(
                 entity.getSimpleName(),
                 new CreateCollectionOptions().validationOptions(validationOptions));
-
           logger.debug("{}", schema);
         });
   }
