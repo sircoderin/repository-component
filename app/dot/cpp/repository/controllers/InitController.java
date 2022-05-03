@@ -14,15 +14,14 @@ import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.models.Customer;
 import dot.cpp.repository.models.User;
 import dot.cpp.repository.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import javax.inject.Inject;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 
 public class InitController extends Controller {
 
@@ -66,10 +65,12 @@ public class InitController extends Controller {
                     .append("validationLevel", "strict"));
             // defaults are added by setting the variable in its respective class with an initial value
             logger.debug("already exists");
-          } else
+          } else {
             database.createCollection(
                 entity.getSimpleName(),
                 new CreateCollectionOptions().validationOptions(validationOptions));
+          }
+
           logger.debug("{}", schema);
         });
   }

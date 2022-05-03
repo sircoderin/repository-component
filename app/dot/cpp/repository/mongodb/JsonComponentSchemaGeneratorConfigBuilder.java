@@ -12,12 +12,12 @@ import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
+import dot.cpp.repository.models.BaseEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.MatchesPattern;
 import javax.annotation.Nonnull;
-import dot.cpp.repository.models.BaseEntity;
 
 public class JsonComponentSchemaGeneratorConfigBuilder {
   private final SchemaGeneratorConfigBuilder schemaGeneratorConfigBuilder;
