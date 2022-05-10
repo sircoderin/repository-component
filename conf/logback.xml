@@ -7,9 +7,7 @@
         <file>${application.home:-.}/logs/application.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>
-                %d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) %cyan(%logger{36}) %magenta(%X{akkaSource}) %msg%n
-            </pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss}%coloredLevel %logger{30}.%M:%L - %message%n%xException{100}</pattern>
         </encoder>
     </appender>
 
