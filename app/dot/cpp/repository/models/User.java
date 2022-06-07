@@ -13,9 +13,7 @@ public class User extends BaseEntity {
 
   @NotBlank private String userName;
 
-  @NotNull
-  @Pattern(regexp = Patterns.ALPHA_PASS_MIN8, message = "constraints.field.invalid")
-  private String password;
+  @NotNull private String password;
 
   @NotNull private UserRole role;
 

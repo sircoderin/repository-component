@@ -25,7 +25,11 @@ public class BaseRepository<T extends BaseEntity> {
     return morphia.datastore().createQuery(clazz).field(field).equal(value).find().toList();
   }
 
-  public void save(T user) {
-    morphia.datastore().save(user);
+  public void save(T entity) {
+    morphia.datastore().save(entity);
+  }
+
+  public void delete(T entity) {
+    morphia.datastore().delete(entity);
   }
 }

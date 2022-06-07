@@ -2,10 +2,11 @@ package dot.cpp.repository.models;
 
 import com.google.gson.Gson;
 import dev.morphia.annotations.Id;
+import org.bson.types.ObjectId;
 
 public abstract class BaseEntity {
 
-  @Id protected String id;
+  @Id protected ObjectId id;
 
   /** Stores the time of creation in format 2020-03-30 23:27:45. */
   protected Long createdAt;
@@ -19,11 +20,11 @@ public abstract class BaseEntity {
   /** Id of the user who modified this record. */
   protected String modifiedBy;
 
-  public String getId() {
+  public ObjectId getId() {
     return id;
   }
 
-  public BaseEntity setId(String id) {
+  public BaseEntity setId(ObjectId id) {
     this.id = id;
     return this;
   }

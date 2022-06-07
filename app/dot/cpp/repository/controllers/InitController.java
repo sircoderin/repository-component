@@ -63,7 +63,8 @@ public class InitController extends Controller {
                 new Document("collMod", entity.getSimpleName())
                     .append("validator", Document.parse(schema))
                     .append("validationLevel", "strict"));
-            // defaults are added by setting the variable in its respective class with an initial value
+            // default values are added by setting the variable in its respective class with an initial
+            // value
             logger.debug("already exists");
           } else {
             database.createCollection(
