@@ -11,8 +11,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ValidationOptions;
 import com.typesafe.config.Config;
 import dot.cpp.repository.models.BaseEntity;
-import dot.cpp.repository.models.Customer;
-import dot.cpp.repository.models.User;
 import dot.cpp.repository.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,17 +31,14 @@ public class InitController extends Controller {
     this.config = config;
   }
 
-  public Result init() {
-    createDatabase();
+  public Result init(List<Class<? extends BaseEntity>> entities) {
+    createDatabase(entities);
     return ok("init");
   }
 
-  public void createDatabase() {
+  public void createDatabase(List<Class<? extends BaseEntity>> entities) {
     try (final MongoClient mongoClient = new MongoClient()) {
       var database = mongoClient.getDatabase(config.getString("db.name"));
-
-      var entities = List.of(User.class, Customer.class);
-
       createCollections(entities, database);
     }
   }
@@ -63,7 +58,8 @@ public class InitController extends Controller {
                 new Document("collMod", entity.getSimpleName())
                     .append("validator", Document.parse(schema))
                     .append("validationLevel", "strict"));
-            // default values are added by setting the variable in its respective class with an initial
+            // default values are added by setting the variable in its respective class with an
+            // initial
             // value
             logger.debug("already exists");
           } else {
