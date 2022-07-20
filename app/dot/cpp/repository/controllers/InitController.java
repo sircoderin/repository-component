@@ -33,7 +33,7 @@ public class InitController extends Controller {
 
   public Result init(List<Class<? extends BaseEntity>> entities) {
     createDatabase(entities);
-    return ok("init");
+    return ok("init complete");
   }
 
   public void createDatabase(List<Class<? extends BaseEntity>> entities) {
@@ -54,14 +54,14 @@ public class InitController extends Controller {
               new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
           if (isCollectionInDatabase(entity.getSimpleName(), database)) {
+            logger.debug("already exists");
+
             database.runCommand(
                 new Document("collMod", entity.getSimpleName())
-                    .append("validator", Document.parse(schema))
+                    .append("validator", Filters.jsonSchema(Document.parse(schema)))
                     .append("validationLevel", "strict"));
             // default values are added by setting the variable in its respective class with an
-            // initial
-            // value
-            logger.debug("already exists");
+            // initial value
           } else {
             database.createCollection(
                 entity.getSimpleName(),
