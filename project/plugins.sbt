@@ -1,5 +1,5 @@
 // The Play plugin
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.15")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.16")
 
 // checks style
 addSbtPlugin("org.xerial.sbt" % "sbt-jcheckstyle" % "0.2.1")
