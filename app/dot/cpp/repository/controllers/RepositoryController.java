@@ -77,11 +77,7 @@ public class RepositoryController extends Controller {
   private SchemaGeneratorConfig getSchemaGeneratorConfig() {
     final var module =
         SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
-    return new SchemaGeneratorBuilder()
-        .withModule(module)
-        .withConstraints()
-        .withInline()
-        .build();
+    return new SchemaGeneratorBuilder().withModule(module).withConstraints().withInline().build();
   }
 
   public String getSchema(Class<?> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {
