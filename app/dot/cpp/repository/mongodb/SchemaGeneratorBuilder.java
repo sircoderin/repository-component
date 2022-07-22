@@ -19,11 +19,11 @@ import java.util.stream.Stream;
 import javax.annotation.MatchesPattern;
 import javax.annotation.Nonnull;
 
-public class JsonComponentSchemaGeneratorConfigBuilder {
+public class SchemaGeneratorBuilder {
   private final SchemaGeneratorConfigBuilder schemaGeneratorConfigBuilder;
   private boolean withConstraints = false;
 
-  public JsonComponentSchemaGeneratorConfigBuilder() {
+  public SchemaGeneratorBuilder() {
     this.schemaGeneratorConfigBuilder = getDefaultBuilder();
   }
 
@@ -32,28 +32,28 @@ public class JsonComponentSchemaGeneratorConfigBuilder {
     return matchesPatter != null ? matchesPatter.value() : null;
   }
 
-  public JsonComponentSchemaGeneratorConfigBuilder withConstraints() {
+  public SchemaGeneratorBuilder withConstraints() {
     schemaGeneratorConfigBuilder.with(Option.DEFINITIONS_FOR_ALL_OBJECTS);
     this.withConstraints = true;
     return this;
   }
 
-  public JsonComponentSchemaGeneratorConfigBuilder withInline() {
+  public SchemaGeneratorBuilder withInline() {
     schemaGeneratorConfigBuilder.with(Option.INLINE_ALL_SCHEMAS);
     return this;
   }
 
-  public JsonComponentSchemaGeneratorConfigBuilder withModule(Module module) {
+  public SchemaGeneratorBuilder withModule(Module module) {
     schemaGeneratorConfigBuilder.with(module);
     return this;
   }
 
-  public JsonComponentSchemaGeneratorConfigBuilder withOption(Option option) {
+  public SchemaGeneratorBuilder withOption(Option option) {
     schemaGeneratorConfigBuilder.with(option);
     return this;
   }
 
-  public JsonComponentSchemaGeneratorConfigBuilder withoutOption(Option option) {
+  public SchemaGeneratorBuilder withoutOption(Option option) {
     schemaGeneratorConfigBuilder.without(option);
     return this;
   }
@@ -92,7 +92,7 @@ public class JsonComponentSchemaGeneratorConfigBuilder {
           .forFields()
           .withNullableCheck(field -> field.getAnnotation(Nonnull.class) == null)
           .withRequiredCheck(this::fieldRequiresCheck)
-          .withStringPatternResolver(JsonComponentSchemaGeneratorConfigBuilder::getFieldPattern);
+          .withStringPatternResolver(SchemaGeneratorBuilder::getFieldPattern);
     } else {
       schemaGeneratorConfigBuilder.forFields().withNullableCheck(field -> true);
     }

@@ -1,7 +1,6 @@
 package dot.cpp.repository.controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.mongodb.MongoClient;
@@ -11,7 +10,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ValidationOptions;
 import com.typesafe.config.Config;
 import dot.cpp.repository.models.BaseEntity;
-import dot.cpp.repository.mongodb.JsonComponentSchemaGeneratorConfigBuilder;
+import dot.cpp.repository.mongodb.SchemaGeneratorBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -46,7 +45,6 @@ public class InitController extends Controller {
   private void createCollections(
       List<Class<? extends BaseEntity>> entities, MongoDatabase database) {
     final var schemaGeneratorConfig = getSchemaGeneratorConfig();
-
     entities.forEach(
         entity -> {
           var schema = getSchema(entity, schemaGeneratorConfig);
@@ -73,25 +71,24 @@ public class InitController extends Controller {
   }
 
   public boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
-    var collectionNames = database.listCollectionNames();
-
+    final var collectionNames = database.listCollectionNames();
     return collectionNames.into(new ArrayList<>()).contains(collectionName);
   }
 
   private SchemaGeneratorConfig getSchemaGeneratorConfig() {
-    var module =
+    final var module =
         SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
-    var configBuilder =
-        new JsonComponentSchemaGeneratorConfigBuilder()
-            .withModule(module)
-            .withConstraints()
-            .withInline();
-    return configBuilder.build();
+    return new SchemaGeneratorBuilder()
+        .withModule(module)
+        .withConstraints()
+        .withInline()
+        .build();
   }
 
   public String getSchema(Class<?> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {
-    SchemaGenerator generator = new SchemaGenerator(schemaGeneratorConfig);
-    ObjectNode jsonSchemaAsObjectNode = generator.generateSchema(entityClass);
+    final var generator =
+        new com.github.victools.jsonschema.generator.SchemaGenerator(schemaGeneratorConfig);
+    final var jsonSchemaAsObjectNode = generator.generateSchema(entityClass);
     jsonSchemaAsObjectNode.remove("$schema");
     return jsonSchemaAsObjectNode.toPrettyString();
   }
