@@ -5,15 +5,12 @@ import dev.morphia.query.Sort;
 import dot.cpp.repository.models.BaseEntity;
 import it.unifi.cerm.playmorphia.PlayMorphia;
 import java.util.List;
+import javax.inject.Inject;
 import org.bson.types.ObjectId;
 
 public class BaseRepository<T extends BaseEntity> {
 
-  private final PlayMorphia morphia;
-
-  public BaseRepository(PlayMorphia morphia) {
-    this.morphia = morphia;
-  }
+  @Inject private PlayMorphia morphia;
 
   public T findById(Class<T> clazz, String id) {
     return morphia.datastore().createQuery(clazz).field("_id").equal(new ObjectId(id)).first();
