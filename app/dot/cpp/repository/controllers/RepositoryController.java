@@ -1,6 +1,5 @@
 package dot.cpp.repository.controllers;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.mongodb.MongoClient;
@@ -20,13 +19,13 @@ import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-public class InitController extends Controller {
+public class RepositoryController extends Controller {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
   private final Config config;
 
   @Inject
-  public InitController(Config config) {
+  public RepositoryController(Config config) {
     this.config = config;
   }
 
