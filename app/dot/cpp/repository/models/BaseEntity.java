@@ -1,8 +1,8 @@
 package dot.cpp.repository.models;
 
-import com.google.gson.Gson;
 import dev.morphia.annotations.Id;
 import org.bson.types.ObjectId;
+import play.libs.Json;
 
 public abstract class BaseEntity {
 
@@ -67,6 +67,6 @@ public abstract class BaseEntity {
 
   @Override
   public String toString() {
-    return new Gson().toJson(this);
+    return Json.stringify(Json.toJson(this));
   }
 }
