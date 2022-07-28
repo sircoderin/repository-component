@@ -79,6 +79,7 @@ public class RepositoryController extends Controller {
     final var module =
         SimpleTypeModule.forPrimitiveAndAdditionalTypes()
             .withNumberType(Byte.class)
+            .withNumberType(Integer.class)
             .withNumberType(Long.class);
     return new SchemaGeneratorBuilder().withModule(module).withConstraints().withInline().build();
   }
