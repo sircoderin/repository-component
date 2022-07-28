@@ -1,5 +1,6 @@
 package dot.cpp.repository.controllers;
 
+import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.mongodb.MongoClient;
@@ -76,13 +77,14 @@ public class RepositoryController extends Controller {
 
   private SchemaGeneratorConfig getSchemaGeneratorConfig() {
     final var module =
-        SimpleTypeModule.forPrimitiveAndAdditionalTypes().withIntegerType(Byte.class, "integer");
+        SimpleTypeModule.forPrimitiveAndAdditionalTypes()
+            .withNumberType(Byte.class)
+            .withNumberType(Long.class);
     return new SchemaGeneratorBuilder().withModule(module).withConstraints().withInline().build();
   }
 
   public String getSchema(Class<?> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {
-    final var generator =
-        new com.github.victools.jsonschema.generator.SchemaGenerator(schemaGeneratorConfig);
+    final var generator = new SchemaGenerator(schemaGeneratorConfig);
     final var jsonSchemaAsObjectNode = generator.generateSchema(entityClass);
     jsonSchemaAsObjectNode.remove("$schema");
     return jsonSchemaAsObjectNode.toPrettyString();
