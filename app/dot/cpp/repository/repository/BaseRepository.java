@@ -1,6 +1,7 @@
 package dot.cpp.repository.repository;
 
 import dev.morphia.query.FindOptions;
+import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
@@ -38,10 +39,23 @@ public class BaseRepository<T extends BaseEntity> {
     return morphia.datastore().find(getEntityType()).iterator().toList();
   }
 
+  public List<T> listWithFilter(Filter filter) {
+    return morphia.datastore().find(getEntityType()).filter(filter).iterator().toList();
+  }
+
   public List<T> listAllPaginated(int pageSize, int pageNum) {
     return morphia
         .datastore()
         .find(getEntityType())
+        .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))
+        .toList();
+  }
+
+  public List<T> listWithFilterPaginated(Filter filter, int pageSize, int pageNum) {
+    return morphia
+        .datastore()
+        .find(getEntityType())
+        .filter(filter)
         .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))
         .toList();
   }
