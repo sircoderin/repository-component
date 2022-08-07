@@ -27,37 +27,43 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> listByField(String field, String value) {
-    return morphia
-        .datastore()
-        .find(getEntityType())
-        .filter(Filters.eq(field, value))
-        .iterator()
-        .toList();
+    try (final var it =
+        morphia.datastore().find(getEntityType()).filter(Filters.eq(field, value)).iterator()) {
+      return it.toList();
+    }
   }
 
   public List<T> listAll() {
-    return morphia.datastore().find(getEntityType()).iterator().toList();
+    try (final var it = morphia.datastore().find(getEntityType()).iterator()) {
+      return it.toList();
+    }
   }
 
   public List<T> listWithFilter(Filter filter) {
-    return morphia.datastore().find(getEntityType()).filter(filter).iterator().toList();
+    try (final var it = morphia.datastore().find(getEntityType()).filter(filter).iterator()) {
+      return it.toList();
+    }
   }
 
   public List<T> listAllPaginated(int pageSize, int pageNum) {
-    return morphia
-        .datastore()
-        .find(getEntityType())
-        .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))
-        .toList();
+    try (final var it =
+        morphia
+            .datastore()
+            .find(getEntityType())
+            .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
+      return it.toList();
+    }
   }
 
   public List<T> listWithFilterPaginated(Filter filter, int pageSize, int pageNum) {
-    return morphia
-        .datastore()
-        .find(getEntityType())
-        .filter(filter)
-        .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))
-        .toList();
+    try (final var it =
+        morphia
+            .datastore()
+            .find(getEntityType())
+            .filter(filter)
+            .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
+      return it.toList();
+    }
   }
 
   public void save(T entity) {
@@ -68,6 +74,7 @@ public class BaseRepository<T extends BaseEntity> {
     morphia.datastore().delete(entity);
   }
 
+  @SuppressWarnings("unchecked")
   private Class<T> getEntityType() {
     final var superType = (ParameterizedType) getClass().getGenericSuperclass();
     final var superTypes = superType.getActualTypeArguments();
