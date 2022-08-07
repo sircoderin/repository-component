@@ -79,7 +79,7 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public void save(T entity) {
-    final var dbEntity= morphia.datastore().save(entity);
+    final var dbEntity = morphia.datastore().save(entity);
     logger.debug("saved {}", dbEntity);
   }
 
