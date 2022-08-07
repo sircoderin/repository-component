@@ -66,6 +66,14 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
+  public long count() {
+    return morphia.datastore().find(getEntityType()).count();
+  }
+
+  public long count(Filter filter) {
+    return morphia.datastore().find(getEntityType()).filter(filter).count();
+  }
+
   public void save(T entity) {
     morphia.datastore().save(entity);
   }
