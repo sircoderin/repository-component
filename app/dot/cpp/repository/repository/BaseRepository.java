@@ -9,8 +9,12 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import javax.inject.Inject;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BaseRepository<T extends BaseEntity> {
+
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Inject private MorphiaService morphia;
 
@@ -75,11 +79,13 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public void save(T entity) {
-    morphia.datastore().save(entity);
+    final var dbEntity= morphia.datastore().save(entity);
+    logger.debug("saved {}", dbEntity);
   }
 
   public void delete(T entity) {
     morphia.datastore().delete(entity);
+    logger.debug("deleted {}", entity);
   }
 
   @SuppressWarnings("unchecked")
