@@ -1,6 +1,7 @@
 package dot.cpp.repository.repository;
 
 import dev.morphia.query.FindOptions;
+import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
@@ -19,20 +20,15 @@ public class BaseRepository<T extends BaseEntity> {
   @Inject private MorphiaService morphia;
 
   public T findById(String id) {
-    return morphia
-        .datastore()
-        .find(getEntityType())
-        .filter(Filters.eq("_id", new ObjectId(id)))
-        .first();
+    return getQuery(Filters.eq("_id", new ObjectId(id))).first();
   }
 
   public T findByField(String field, String value) {
-    return morphia.datastore().find(getEntityType()).filter(Filters.eq(field, value)).first();
+    return getQuery(Filters.eq(field, value)).first();
   }
 
   public List<T> listByField(String field, String value) {
-    try (final var it =
-        morphia.datastore().find(getEntityType()).filter(Filters.eq(field, value)).iterator()) {
+    try (final var it = getQuery(Filters.eq(field, value)).iterator()) {
       return it.toList();
     }
   }
@@ -44,7 +40,11 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> listWithFilter(Filter filter) {
-    try (final var it = morphia.datastore().find(getEntityType()).filter(filter).iterator()) {
+    if (filter == null) {
+      return List.of();
+    }
+
+    try (final var it = getQuery(filter).iterator()) {
       return it.toList();
     }
   }
@@ -60,12 +60,12 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> listWithFilterPaginated(Filter filter, int pageSize, int pageNum) {
+    if (filter == null) {
+      return List.of();
+    }
+
     try (final var it =
-        morphia
-            .datastore()
-            .find(getEntityType())
-            .filter(filter)
-            .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
+        getQuery(filter).iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
       return it.toList();
     }
   }
@@ -75,7 +75,7 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public long count(Filter filter) {
-    return morphia.datastore().find(getEntityType()).filter(filter).count();
+    return getQuery(filter).count();
   }
 
   public void save(T entity) {
@@ -86,6 +86,10 @@ public class BaseRepository<T extends BaseEntity> {
   public void delete(T entity) {
     morphia.datastore().delete(entity);
     logger.debug("deleted {}", entity);
+  }
+
+  private Query<T> getQuery(Filter filter) {
+    return morphia.datastore().find(getEntityType()).filter(filter);
   }
 
   @SuppressWarnings("unchecked")
