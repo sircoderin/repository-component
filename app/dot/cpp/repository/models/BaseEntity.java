@@ -24,6 +24,8 @@ public abstract class BaseEntity {
     return id;
   }
 
+  public String getStrId() { return id.toString(); }
+
   public BaseEntity setId(ObjectId id) {
     this.id = id;
     return this;
