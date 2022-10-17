@@ -2,6 +2,7 @@ package dot.cpp.repository.repository;
 
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
+import dev.morphia.query.Sort;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
@@ -76,6 +77,13 @@ public class BaseRepository<T extends BaseEntity> {
 
   public long count(Filter filter) {
     return getQuery(filter).count();
+  }
+
+  public T getFirstSorted(Sort sort) {
+    try (final var it =
+        morphia.datastore().find(getEntityType()).iterator(new FindOptions().sort(sort).limit(1))) {
+      return it.tryNext();
+    }
   }
 
   public void save(T entity) {
