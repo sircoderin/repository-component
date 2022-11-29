@@ -1,6 +1,11 @@
 package dot.cpp.repository.repository;
 
+import dev.morphia.aggregation.experimental.Aggregation;
+import dev.morphia.aggregation.experimental.expressions.AccumulatorExpressions;
+import dev.morphia.aggregation.experimental.expressions.Expressions;
+import dev.morphia.aggregation.experimental.stages.Group;
 import dev.morphia.query.FindOptions;
+import dev.morphia.query.MorphiaCursor;
 import dev.morphia.query.Query;
 import dev.morphia.query.Sort;
 import dev.morphia.query.experimental.filters.Filter;
@@ -8,9 +13,11 @@ import dev.morphia.query.experimental.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
 import java.util.List;
 import javax.inject.Inject;
 import org.bson.types.ObjectId;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +28,21 @@ public class BaseRepository<T extends BaseEntity> {
   @Inject private MorphiaService morphia;
 
   public T findById(String id) {
-    return getQuery(Filters.eq("_id", new ObjectId(id))).first();
+    return getFindQuery(Filters.eq("_id", new ObjectId(id))).first();
   }
 
   public T findByField(String field, String value) {
-    return getQuery(Filters.eq(field, value)).first();
+    return getFindQuery(Filters.eq(field, value)).first();
   }
 
   public List<T> listByField(String field, String value) {
-    try (final var it = getQuery(Filters.eq(field, value)).iterator()) {
+    try (final var it = getFindQuery(Filters.eq(field, value)).iterator()) {
       return it.toList();
     }
   }
 
   public List<T> listAll() {
-    try (final var it = morphia.datastore().find(getEntityType()).iterator()) {
+    try (final var it = getFindQuery().iterator()) {
       return it.toList();
     }
   }
@@ -45,17 +52,14 @@ public class BaseRepository<T extends BaseEntity> {
       return List.of();
     }
 
-    try (final var it = getQuery(filter).iterator()) {
+    try (final var it = getFindQuery(filter).iterator()) {
       return it.toList();
     }
   }
 
   public List<T> listAllPaginated(int pageSize, int pageNum) {
     try (final var it =
-        morphia
-            .datastore()
-            .find(getEntityType())
-            .iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
+        getFindQuery().iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
       return it.toList();
     }
   }
@@ -66,22 +70,42 @@ public class BaseRepository<T extends BaseEntity> {
     }
 
     try (final var it =
-        getQuery(filter).iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
+        getFindQuery(filter).iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
       return it.toList();
     }
   }
 
   public long count() {
-    return morphia.datastore().find(getEntityType()).count();
+    return getFindQuery().count();
   }
 
   public long count(Filter filter) {
-    return getQuery(filter).count();
+    return getFindQuery(filter).count();
+  }
+
+  public long sum(String field) {
+    try (final var it = getAggregation().group(getSumGroup(field)).execute(HashMap.class)) {
+      return getSumResult(it);
+    }
+  }
+
+  public long sum(String field, Filter filter) {
+    try (final var it = getAggregation(filter).group(getSumGroup(field)).execute(HashMap.class)) {
+      return getSumResult(it);
+    }
+  }
+
+  private long getSumResult(MorphiaCursor<HashMap> it) {
+    return it.hasNext() ? ((Number) it.next().get("sum")).longValue() : 0;
+  }
+
+  @NotNull
+  private Group getSumGroup(String field) {
+    return Group.group().field("sum", AccumulatorExpressions.sum(Expressions.field(field)));
   }
 
   public T getFirstSorted(Sort sort) {
-    try (final var it =
-        morphia.datastore().find(getEntityType()).iterator(new FindOptions().sort(sort).limit(1))) {
+    try (final var it = getFindQuery().iterator(new FindOptions().sort(sort).limit(1))) {
       return it.tryNext();
     }
   }
@@ -96,8 +120,24 @@ public class BaseRepository<T extends BaseEntity> {
     logger.debug("deleted {}", entity);
   }
 
-  private Query<T> getQuery(Filter filter) {
-    return morphia.datastore().find(getEntityType()).filter(filter);
+  @NotNull
+  private Query<T> getFindQuery() {
+    return morphia.datastore().find(getEntityType());
+  }
+
+  @NotNull
+  private Query<T> getFindQuery(Filter filter) {
+    return getFindQuery().filter(filter);
+  }
+
+  @NotNull
+  private Aggregation<T> getAggregation() {
+    return morphia.datastore().aggregate(getEntityType());
+  }
+
+  @NotNull
+  private Aggregation<T> getAggregation(Filter filter) {
+    return getAggregation().match(filter);
   }
 
   @SuppressWarnings("unchecked")
