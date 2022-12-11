@@ -35,44 +35,52 @@ public class BaseRepository<T extends BaseEntity> {
     return getFindQuery(Filters.eq(field, value)).first();
   }
 
-  public List<T> listByField(String field, String value) {
-    try (final var it = getFindQuery(Filters.eq(field, value)).iterator()) {
+  public List<T> listByField(String field, String value, Sort... sortBy) {
+    try (final var it = getFindQuery(Filters.eq(field, value)).iterator(getSortOptions(sortBy))) {
       return it.toList();
     }
   }
 
-  public List<T> listAll() {
-    try (final var it = getFindQuery().iterator()) {
+  public List<T> listAll(Sort... sortBy) {
+    try (final var it = getFindQuery().iterator(getSortOptions(sortBy))) {
       return it.toList();
     }
   }
 
-  public List<T> listWithFilter(Filter filter) {
+  public List<T> listWithFilter(Filter filter, Sort... sortBy) {
     if (filter == null) {
       return List.of();
     }
 
-    try (final var it = getFindQuery(filter).iterator()) {
+    try (final var it = getFindQuery(filter).iterator(getSortOptions(sortBy))) {
       return it.toList();
     }
   }
 
-  public List<T> listAllPaginated(int pageSize, int pageNum) {
-    try (final var it =
-        getFindQuery().iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
+  public List<T> listAllPaginated(int pageSize, int pageNum, Sort... sortBy) {
+    try (final var it = getFindQuery().iterator(getOptions(pageSize, pageNum).sort(sortBy))) {
       return it.toList();
     }
   }
 
-  public List<T> listWithFilterPaginated(Filter filter, int pageSize, int pageNum) {
+  public List<T> listWithFilterPaginated(Filter filter, int pageSize, int pageNum, Sort... sortBy) {
     if (filter == null) {
       return List.of();
     }
 
-    try (final var it =
-        getFindQuery(filter).iterator(new FindOptions().skip(pageNum * pageSize).limit(pageSize))) {
+    try (final var it = getFindQuery(filter).iterator(getOptions(pageSize, pageNum).sort(sortBy))) {
       return it.toList();
     }
+  }
+
+  @NotNull
+  private static FindOptions getSortOptions(Sort[] sortBy) {
+    return new FindOptions().sort(sortBy);
+  }
+
+  @NotNull
+  private static FindOptions getOptions(int pageSize, int pageNum) {
+    return new FindOptions().skip(pageNum * pageSize).limit(pageSize);
   }
 
   public long count() {
