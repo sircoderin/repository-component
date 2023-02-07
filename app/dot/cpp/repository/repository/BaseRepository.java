@@ -74,12 +74,12 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   @NotNull
-  private static FindOptions getSortOptions(Sort[] sortBy) {
+  protected static FindOptions getSortOptions(Sort[] sortBy) {
     return new FindOptions().sort(sortBy);
   }
 
   @NotNull
-  private static FindOptions getOptions(int pageSize, int pageNum) {
+  protected static FindOptions getOptions(int pageSize, int pageNum) {
     return new FindOptions().skip(pageNum * pageSize).limit(pageSize);
   }
 
@@ -103,12 +103,12 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  private long getSumResult(MorphiaCursor<HashMap> it) {
+  protected long getSumResult(MorphiaCursor<HashMap> it) {
     return it.hasNext() ? ((Number) it.next().get("sum")).longValue() : 0;
   }
 
   @NotNull
-  private Group getSumGroup(String field) {
+  protected Group getSumGroup(String field) {
     return Group.group().field("sum", AccumulatorExpressions.sum(Expressions.field(field)));
   }
 
@@ -129,27 +129,27 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   @NotNull
-  private Query<T> getFindQuery() {
+  protected Query<T> getFindQuery() {
     return morphia.datastore().find(getEntityType());
   }
 
   @NotNull
-  private Query<T> getFindQuery(Filter filter) {
+  protected Query<T> getFindQuery(Filter filter) {
     return getFindQuery().filter(filter);
   }
 
   @NotNull
-  private Aggregation<T> getAggregation() {
+  protected Aggregation<T> getAggregation() {
     return morphia.datastore().aggregate(getEntityType());
   }
 
   @NotNull
-  private Aggregation<T> getAggregation(Filter filter) {
+  protected Aggregation<T> getAggregation(Filter filter) {
     return getAggregation().match(filter);
   }
 
   @SuppressWarnings("unchecked")
-  private Class<T> getEntityType() {
+  protected Class<T> getEntityType() {
     final var superType = (ParameterizedType) getClass().getGenericSuperclass();
     final var superTypes = superType.getActualTypeArguments();
     return ((Class<T>) superTypes[0]);
