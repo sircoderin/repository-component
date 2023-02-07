@@ -1,5 +1,6 @@
 package dot.cpp.repository.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.morphia.annotations.Id;
 import org.bson.types.ObjectId;
 import play.libs.Json;
@@ -24,8 +25,9 @@ public abstract class BaseEntity {
     return id;
   }
 
+  @JsonProperty("strId")
   public String getStrId() {
-    return id.toString();
+    return id != null ? id.toString() : "";
   }
 
   public BaseEntity setId(ObjectId id) {
