@@ -9,13 +9,13 @@ public abstract class BaseEntity {
 
   @Id protected ObjectId id;
 
-  /** Stores the time of creation in format 2020-03-30 23:27:45. */
+  /** Date and time of creation as UNIX timestamp. */
   protected Long createdAt;
 
   /** Id of the user who created this record. */
   protected String createdBy;
 
-  /** The date time of the last modification in format 2020-03-30 23:27:45. */
+  /** Date and time of the last modification as UNIX timestamp. */
   protected Long modifiedAt;
 
   /** Id of the user who modified this record. */
@@ -69,6 +69,10 @@ public abstract class BaseEntity {
   public BaseEntity setModifiedBy(String modifiedBy) {
     this.modifiedBy = modifiedBy;
     return this;
+  }
+
+  public boolean isNew() {
+    return id == null;
   }
 
   @Override

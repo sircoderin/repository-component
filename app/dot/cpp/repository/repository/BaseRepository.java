@@ -27,8 +27,12 @@ public class BaseRepository<T extends BaseEntity> {
 
   @Inject private MorphiaService morphia;
 
+  public T findById(ObjectId id) {
+    return getFindQuery(Filters.eq("_id", id)).first();
+  }
+
   public T findById(String id) {
-    return getFindQuery(Filters.eq("_id", new ObjectId(id))).first();
+    return findById(new ObjectId(id));
   }
 
   public T findByField(String field, String value) {

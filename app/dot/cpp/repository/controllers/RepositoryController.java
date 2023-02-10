@@ -30,20 +30,20 @@ public class RepositoryController extends Controller {
     this.config = config;
   }
 
-  public Result init(List<Class<? extends BaseEntity>> entities) {
-    createDatabase(entities);
+  public Result init(List<Class<? extends BaseEntity>> entities, boolean withHistory) {
+    createCollections(entities, withHistory);
     return ok("init complete");
   }
 
-  public void createDatabase(List<Class<? extends BaseEntity>> entities) {
+  public void createCollections(List<Class<? extends BaseEntity>> entities, boolean withHistory) {
     try (final MongoClient mongoClient = new MongoClient()) {
       var database = mongoClient.getDatabase(config.getString("db.name"));
-      createCollections(entities, database);
+      createCollections(database, entities, withHistory);
     }
   }
 
   private void createCollections(
-      List<Class<? extends BaseEntity>> entities, MongoDatabase database) {
+      MongoDatabase database, List<Class<? extends BaseEntity>> entities, boolean withHistory) {
     final var schemaGeneratorConfig = getSchemaGeneratorConfig();
     entities.forEach(
         entity -> {
@@ -51,23 +51,35 @@ public class RepositoryController extends Controller {
           var validationOptions =
               new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
-          if (isCollectionInDatabase(entity.getSimpleName(), database)) {
-            logger.debug("already exists");
+          createCollection(database, entity.getSimpleName(), schema, validationOptions);
 
-            database.runCommand(
-                new Document("collMod", entity.getSimpleName())
-                    .append("validator", Filters.jsonSchema(Document.parse(schema)))
-                    .append("validationLevel", "strict"));
-            // default values are added by setting the variable in its respective class with an
-            // initial value
-          } else {
-            database.createCollection(
-                entity.getSimpleName(),
-                new CreateCollectionOptions().validationOptions(validationOptions));
+          if (withHistory) {
+            createCollection(
+                database, entity.getSimpleName() + "_history", schema, validationOptions);
           }
 
           logger.debug("{}", schema);
         });
+  }
+
+  private void createCollection(
+      MongoDatabase database,
+      String entityName,
+      String schema,
+      ValidationOptions validationOptions) {
+    if (isCollectionInDatabase(entityName, database)) {
+      logger.debug("already exists");
+
+      database.runCommand(
+          new Document("collMod", entityName)
+              .append("validator", Filters.jsonSchema(Document.parse(schema)))
+              .append("validationLevel", "strict"));
+      // default values are added by setting the variable in its respective class with an
+      // initial value
+    } else {
+      database.createCollection(
+          entityName, new CreateCollectionOptions().validationOptions(validationOptions));
+    }
   }
 
   public boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
