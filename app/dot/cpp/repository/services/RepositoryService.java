@@ -1,4 +1,4 @@
-package dot.cpp.repository.controllers;
+package dot.cpp.repository.services;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -17,27 +17,20 @@ import javax.inject.Inject;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.mvc.Controller;
-import play.mvc.Result;
 
-public class RepositoryController extends Controller {
+public class RepositoryService {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
   private final Config config;
 
   @Inject
-  public RepositoryController(Config config) {
+  public RepositoryService(Config config) {
     this.config = config;
-  }
-
-  public Result init(List<Class<? extends BaseEntity>> entities, boolean withHistory) {
-    createCollections(entities, withHistory);
-    return ok("init complete");
   }
 
   public void createCollections(List<Class<? extends BaseEntity>> entities, boolean withHistory) {
     try (final MongoClient mongoClient = new MongoClient()) {
-      var database = mongoClient.getDatabase(config.getString("db.name"));
+      var database = mongoClient.getDatabase(config.getString("morphia.database"));
       createCollections(database, entities, withHistory);
     }
   }

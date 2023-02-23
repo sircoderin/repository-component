@@ -15,6 +15,7 @@ import dot.cpp.repository.mongodb.MorphiaService;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import javax.inject.Inject;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -122,9 +123,40 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
+  public void saveWithHistory(T entity) {
+    final var currentEntity = findById(entity.getId());
+
+    if (currentEntity == null) {
+      entity.setTrackingId(UUID.randomUUID().toString());
+    }
+
+    final var savedEntity = morphia.datastore().save(entity);
+
+    // create flag for repository has history or extend this class
+    // different methods for saving with or without history/tracking
+
+    final var historyCollection =
+        morphia
+            .datastore()
+            .getDatabase()
+            .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
+    // morphia sets the Mongo codecs based on POJOs, if the mongo client is used directly then the
+    // codecs have to be set separately
+
+    if (currentEntity != null) {
+      // set null id in order to generate a new, unique one
+      currentEntity.setId(null);
+      historyCollection.insertOne(currentEntity);
+    }
+
+    // try-catch if history write fails?
+
+    logger.debug("saved {}", savedEntity);
+  }
+
   public void save(T entity) {
-    final var dbEntity = morphia.datastore().save(entity);
-    logger.debug("saved {}", dbEntity);
+    final var savedEntity = morphia.datastore().save(entity);
+    logger.debug("saved {}", savedEntity);
   }
 
   public void delete(T entity) {
