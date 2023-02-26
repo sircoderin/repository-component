@@ -13,6 +13,7 @@ import dev.morphia.query.experimental.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -28,12 +29,34 @@ public class BaseRepository<T extends BaseEntity> {
 
   @Inject private MorphiaService morphia;
 
+  @NotNull
+  protected static FindOptions getSortOptions(Sort[] sortBy) {
+    return new FindOptions().sort(sortBy);
+  }
+
+  @NotNull
+  protected static FindOptions getOptions(int pageSize, int pageNum) {
+    return new FindOptions().skip(pageNum * pageSize).limit(pageSize);
+  }
+
   public T findById(ObjectId id) {
     return getFindQuery(Filters.eq("_id", id)).first();
   }
 
   public T findById(String id) {
     return findById(new ObjectId(id));
+  }
+
+  public T findByHistoryId(String id) {
+    final var historyCollection =
+        morphia
+            .datastore()
+            .getDatabase()
+            .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
+
+    return historyCollection
+        .find(com.mongodb.client.model.Filters.eq("_id", new ObjectId(id)))
+        .first();
   }
 
   public T findByField(String field, String value) {
@@ -78,14 +101,21 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  @NotNull
-  protected static FindOptions getSortOptions(Sort[] sortBy) {
-    return new FindOptions().sort(sortBy);
-  }
+  public List<T> listHistory(String trackingId) {
+    final var historyCollection =
+        morphia
+            .datastore()
+            .getDatabase()
+            .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
 
-  @NotNull
-  protected static FindOptions getOptions(int pageSize, int pageNum) {
-    return new FindOptions().skip(pageNum * pageSize).limit(pageSize);
+    final var historyIterator =
+        historyCollection
+            .find(com.mongodb.client.model.Filters.eq("trackingId", trackingId))
+            .sort(com.mongodb.client.model.Sorts.descending("modifiedAt"));
+    final var historyEntities = new ArrayList<T>();
+    historyIterator.forEach(historyEntities::add);
+
+    return historyEntities;
   }
 
   public long count() {
