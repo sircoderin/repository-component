@@ -35,8 +35,8 @@ public class BaseRepository<T extends BaseEntity> {
     return getFindQuery(Filters.eq(field, value)).first();
   }
 
-  public List<T> listByField(String field, String value, Sort... sortBy) {
-    try (final var it = getFindQuery(Filters.eq(field, value)).iterator(getSortOptions(sortBy))) {
+  public List<T> list(Filter filter, int skip, int length, Sort... sortBy) {
+    try (final var it = getFindQuery(filter).iterator(getNewOptions(skip, length).sort(sortBy))) {
       return it.toList();
     }
   }
@@ -47,11 +47,13 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  public List<T> listWithFilter(Filter filter, Sort... sortBy) {
-    if (filter == null) {
-      return List.of();
+  public List<T> listByField(String field, String value, Sort... sortBy) {
+    try (final var it = getFindQuery(Filters.eq(field, value)).iterator(getSortOptions(sortBy))) {
+      return it.toList();
     }
+  }
 
+  public List<T> listWithFilter(Filter filter, Sort... sortBy) {
     try (final var it = getFindQuery(filter).iterator(getSortOptions(sortBy))) {
       return it.toList();
     }
@@ -64,10 +66,6 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> listWithFilterPaginated(Filter filter, int pageSize, int pageNum, Sort... sortBy) {
-    if (filter == null) {
-      return List.of();
-    }
-
     try (final var it = getFindQuery(filter).iterator(getOptions(pageSize, pageNum).sort(sortBy))) {
       return it.toList();
     }
@@ -79,8 +77,13 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   @NotNull
+  private static FindOptions getNewOptions(int skip, int length) {
+    return new FindOptions().skip(skip).limit(length);
+  }
+
+  @NotNull
   protected static FindOptions getOptions(int pageSize, int pageNum) {
-    return new FindOptions().skip(pageNum * pageSize).limit(pageSize);
+    return getNewOptions(pageNum * pageSize, pageSize);
   }
 
   public long count() {
@@ -135,7 +138,7 @@ public class BaseRepository<T extends BaseEntity> {
 
   @NotNull
   protected Query<T> getFindQuery(Filter filter) {
-    return getFindQuery().filter(filter);
+    return filter != null ? getFindQuery().filter(filter) : getFindQuery();
   }
 
   @NotNull
