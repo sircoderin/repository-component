@@ -148,7 +148,7 @@ public class BaseRepository<T extends BaseEntity> {
 
   @NotNull
   protected Aggregation<T> getAggregation(Filter filter) {
-    return getAggregation().match(filter);
+    return filter != null ? getAggregation().match(filter) : getAggregation();
   }
 
   @SuppressWarnings("unchecked")
