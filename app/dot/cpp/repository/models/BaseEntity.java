@@ -11,12 +11,6 @@ public abstract class BaseEntity {
 
   protected String trackingId;
 
-  /** Date and time of creation as UNIX timestamp. */
-  protected Long createdAt;
-
-  /** Id of the user who created this record. */
-  protected String createdBy;
-
   /** Date and time of the last modification as UNIX timestamp. */
   protected Long modifiedAt;
 
@@ -46,24 +40,6 @@ public abstract class BaseEntity {
 
   public void setTrackingId(String trackingId) {
     this.trackingId = trackingId;
-  }
-
-  public Long getCreatedAt() {
-    return createdAt;
-  }
-
-  public BaseEntity setCreatedAt(Long createdAt) {
-    this.createdAt = createdAt;
-    return this;
-  }
-
-  public String getCreatedBy() {
-    return createdBy;
-  }
-
-  public BaseEntity setCreatedBy(String createdBy) {
-    this.createdBy = createdBy;
-    return this;
   }
 
   public Long getModifiedAt() {

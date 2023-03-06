@@ -7,6 +7,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ValidationOptions;
 import com.typesafe.config.Config;
 import dot.cpp.repository.models.BaseEntity;
@@ -49,10 +51,28 @@ public class RepositoryService {
           if (withHistory) {
             createCollection(
                 database, entity.getSimpleName() + "_history", schema, validationOptions);
+
+            createIndex(database, entity.getSimpleName(), "trackingId", true);
+            createIndex(database, entity.getSimpleName() + "_history", "trackingId", false);
           }
 
           logger.debug("{}", schema);
         });
+  }
+
+  private void createIndex(
+      MongoDatabase database, String entityName, String fieldName, Boolean unique) {
+    final var collection = database.getCollection(entityName);
+
+    for (final var index : collection.listIndexes()) {
+      if (index.getString("name").equals(fieldName + "_1")) {
+        collection.dropIndex(fieldName + "_1");
+        break;
+      }
+    }
+
+    collection.createIndex(
+        Indexes.ascending(fieldName), new IndexOptions().name(fieldName + "_idx").unique(unique));
   }
 
   private void createCollection(

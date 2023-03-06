@@ -1,5 +1,9 @@
 package dot.cpp.repository.repository;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Sorts.descending;
+
+import com.mongodb.client.MongoCollection;
 import dev.morphia.aggregation.experimental.Aggregation;
 import dev.morphia.aggregation.experimental.expressions.AccumulatorExpressions;
 import dev.morphia.aggregation.experimental.expressions.Expressions;
@@ -13,6 +17,7 @@ import dev.morphia.query.experimental.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
 import java.lang.reflect.ParameterizedType;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +33,8 @@ public class BaseRepository<T extends BaseEntity> {
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Inject private MorphiaService morphia;
+
+  private static final String INITIAL = "initial";
 
   @NotNull
   protected static FindOptions getSortOptions(Sort[] sortBy) {
@@ -48,13 +55,7 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public T findByHistoryId(String id) {
-    final var historyCollection =
-        morphia
-            .datastore()
-            .getDatabase()
-            .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
-
-    return historyCollection
+    return getHistoryCollection()
         .find(com.mongodb.client.model.Filters.eq("_id", new ObjectId(id)))
         .first();
   }
@@ -102,20 +103,26 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> listHistory(String trackingId) {
-    final var historyCollection =
-        morphia
-            .datastore()
-            .getDatabase()
-            .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
-
-    final var historyIterator =
-        historyCollection
-            .find(com.mongodb.client.model.Filters.eq("trackingId", trackingId))
-            .sort(com.mongodb.client.model.Sorts.descending("modifiedAt"));
     final var historyEntities = new ArrayList<T>();
-    historyIterator.forEach(historyEntities::add);
+
+    getHistoryCollection()
+        .find(eq("trackingId", trackingId))
+        .sort(descending("modifiedAt"))
+        .forEach(historyEntities::add);
 
     return historyEntities;
+  }
+
+  // Morphia sets the Mongo codecs based on POJOs, if the Mongo client is used directly then the
+  // codecs have to be set separately, so Morphia is useful in this sense
+  @NotNull
+  private MongoCollection<T> getHistoryCollection() {
+    // todo check for existence?
+    // Mongo will create the collection on the first insert if it does not exist
+    return morphia
+        .datastore()
+        .getDatabase()
+        .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
   }
 
   public long count() {
@@ -156,31 +163,19 @@ public class BaseRepository<T extends BaseEntity> {
   public void saveWithHistory(T entity) {
     final var currentEntity = findById(entity.getId());
 
+    entity.setModifiedAt(Instant.now().getEpochSecond());
+
     if (currentEntity == null) {
+      // entity creation
       entity.setTrackingId(UUID.randomUUID().toString());
+      entity.setModifiedComment(INITIAL);
+    } else {
+      // set null id in order to generate a new, unique one in the history collection
+      currentEntity.setId(null);
+      getHistoryCollection().insertOne(currentEntity);
     }
 
     final var savedEntity = morphia.datastore().save(entity);
-
-    // create flag for repository has history or extend this class
-    // different methods for saving with or without history/tracking
-
-    final var historyCollection =
-        morphia
-            .datastore()
-            .getDatabase()
-            .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
-    // morphia sets the Mongo codecs based on POJOs, if the mongo client is used directly then the
-    // codecs have to be set separately
-
-    if (currentEntity != null) {
-      // set null id in order to generate a new, unique one
-      currentEntity.setId(null);
-      historyCollection.insertOne(currentEntity);
-    }
-
-    // try-catch if history write fails?
-
     logger.debug("saved {}", savedEntity);
   }
 
