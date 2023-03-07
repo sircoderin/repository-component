@@ -1,19 +1,15 @@
 package dot.cpp.repository.repository;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Sorts.descending;
-
-import com.mongodb.client.MongoCollection;
-import dev.morphia.aggregation.experimental.Aggregation;
-import dev.morphia.aggregation.experimental.expressions.AccumulatorExpressions;
-import dev.morphia.aggregation.experimental.expressions.Expressions;
-import dev.morphia.aggregation.experimental.stages.Group;
+import dev.morphia.aggregation.Aggregation;
+import dev.morphia.aggregation.expressions.AccumulatorExpressions;
+import dev.morphia.aggregation.expressions.Expressions;
+import dev.morphia.aggregation.stages.Group;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.MorphiaCursor;
 import dev.morphia.query.Query;
 import dev.morphia.query.Sort;
-import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.experimental.filters.Filters;
+import dev.morphia.query.filters.Filter;
+import dev.morphia.query.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
 import java.lang.reflect.ParameterizedType;
