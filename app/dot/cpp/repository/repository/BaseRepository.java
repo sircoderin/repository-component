@@ -1,5 +1,9 @@
 package dot.cpp.repository.repository;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Sorts.descending;
+
+import com.mongodb.client.MongoCollection;
 import dev.morphia.aggregation.Aggregation;
 import dev.morphia.aggregation.expressions.AccumulatorExpressions;
 import dev.morphia.aggregation.expressions.Expressions;
@@ -51,9 +55,7 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public T findByHistoryId(String id) {
-    return getHistoryCollection()
-        .find(com.mongodb.client.model.Filters.eq("_id", new ObjectId(id)))
-        .first();
+    return getHistoryCollection().find(eq("_id", new ObjectId(id))).first();
   }
 
   public T findByField(String field, String value) {
