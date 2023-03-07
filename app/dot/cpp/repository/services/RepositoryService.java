@@ -65,8 +65,8 @@ public class RepositoryService {
     final var collection = database.getCollection(entityName);
 
     for (final var index : collection.listIndexes()) {
-      if (index.getString("name").equals(fieldName + "_1")) {
-        collection.dropIndex(fieldName + "_1");
+      if (index.getString("name").equals(fieldName + "_idx")) {
+        collection.dropIndex(fieldName + "_idx");
         break;
       }
     }
@@ -87,8 +87,7 @@ public class RepositoryService {
           new Document("collMod", entityName)
               .append("validator", Filters.jsonSchema(Document.parse(schema)))
               .append("validationLevel", "strict"));
-      // default values are added by setting the variable in its respective class with an
-      // initial value
+      // default values are set by hard coding an initial value for those variables
     } else {
       database.createCollection(
           entityName, new CreateCollectionOptions().validationOptions(validationOptions));
