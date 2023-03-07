@@ -52,7 +52,8 @@ public class RepositoryService {
             createCollection(
                 database, entity.getSimpleName() + "_history", schema, validationOptions);
 
-            createIndex(database, entity.getSimpleName(), "trackingId", true);
+            // todo uncomment after history is implemented throughout the application
+            // createIndex(database, entity.getSimpleName(), "trackingId", true);
             createIndex(database, entity.getSimpleName() + "_history", "trackingId", false);
           }
 
