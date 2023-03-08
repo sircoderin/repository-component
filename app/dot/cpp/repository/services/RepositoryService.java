@@ -88,7 +88,6 @@ public class RepositoryService {
           new Document("collMod", entityName)
               .append("validator", Filters.jsonSchema(Document.parse(schema)))
               .append("validationLevel", "strict"));
-      // default values are set by hard coding an initial value for those variables
     } else {
       database.createCollection(
           entityName, new CreateCollectionOptions().validationOptions(validationOptions));

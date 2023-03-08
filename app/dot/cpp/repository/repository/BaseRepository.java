@@ -16,6 +16,7 @@ import dev.morphia.query.filters.Filter;
 import dev.morphia.query.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
+import dot.cpp.repository.services.RepositoryService;
 import java.lang.reflect.ParameterizedType;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,11 +31,10 @@ import org.slf4j.LoggerFactory;
 
 public class BaseRepository<T extends BaseEntity> {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
-
-  @Inject private MorphiaService morphia;
-
   private static final String INITIAL = "initial";
+  private final Logger logger = LoggerFactory.getLogger(getClass());
+  @Inject
+  private MorphiaService morphia;
 
   @NotNull
   protected static FindOptions getSortOptions(Sort[] sortBy) {
@@ -111,12 +111,12 @@ public class BaseRepository<T extends BaseEntity> {
     return historyEntities;
   }
 
-  // Morphia sets the Mongo codecs based on POJOs, if the Mongo client is used directly then the
-  // codecs have to be set separately, so Morphia is useful in this sense
+  /**
+   * Morphia sets the codec registries automatically from the POJOs, but the Mongo client needs manual setup
+   * History collections must be initialized using {@link RepositoryService} to support indexing
+   */
   @NotNull
   private MongoCollection<T> getHistoryCollection() {
-    // todo check for existence?
-    // Mongo will create the collection on the first insert if it does not exist
     return morphia
         .datastore()
         .getDatabase()
@@ -164,12 +164,10 @@ public class BaseRepository<T extends BaseEntity> {
     entity.setModifiedAt(Instant.now().getEpochSecond());
 
     if (currentEntity == null) {
-      // entity creation
       entity.setTrackingId(UUID.randomUUID().toString());
       entity.setModifiedComment(INITIAL);
     } else {
-      // set null id in order to generate a new, unique one in the history collection
-      currentEntity.setId(null);
+      currentEntity.setId(new ObjectId());
       getHistoryCollection().insertOne(currentEntity);
     }
 
