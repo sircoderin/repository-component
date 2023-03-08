@@ -9,17 +9,16 @@ public abstract class BaseEntity {
 
   @Id protected ObjectId id;
 
-  /** Stores the time of creation in format 2020-03-30 23:27:45. */
-  protected Long createdAt;
+  protected String trackingId;
 
-  /** Id of the user who created this record. */
-  protected String createdBy;
-
-  /** The date time of the last modification in format 2020-03-30 23:27:45. */
+  /** Date and time of the last modification as UNIX timestamp. */
   protected Long modifiedAt;
 
   /** Id of the user who modified this record. */
   protected String modifiedBy;
+
+  /** Comment describing the last modification. */
+  protected String modifiedComment;
 
   public ObjectId getId() {
     return id;
@@ -35,22 +34,12 @@ public abstract class BaseEntity {
     return this;
   }
 
-  public Long getCreatedAt() {
-    return createdAt;
+  public String getTrackingId() {
+    return trackingId;
   }
 
-  public BaseEntity setCreatedAt(Long createdAt) {
-    this.createdAt = createdAt;
-    return this;
-  }
-
-  public String getCreatedBy() {
-    return createdBy;
-  }
-
-  public BaseEntity setCreatedBy(String createdBy) {
-    this.createdBy = createdBy;
-    return this;
+  public void setTrackingId(String trackingId) {
+    this.trackingId = trackingId;
   }
 
   public Long getModifiedAt() {
@@ -69,6 +58,18 @@ public abstract class BaseEntity {
   public BaseEntity setModifiedBy(String modifiedBy) {
     this.modifiedBy = modifiedBy;
     return this;
+  }
+
+  public String getModifiedComment() {
+    return modifiedComment;
+  }
+
+  public void setModifiedComment(String modifiedComment) {
+    this.modifiedComment = modifiedComment;
+  }
+
+  public boolean isNew() {
+    return id == null;
   }
 
   @Override

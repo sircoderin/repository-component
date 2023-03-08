@@ -1,4 +1,4 @@
-package dot.cpp.repository.controllers;
+package dot.cpp.repository.services;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -7,6 +7,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ValidationOptions;
 import com.typesafe.config.Config;
 import dot.cpp.repository.models.BaseEntity;
@@ -17,33 +19,26 @@ import javax.inject.Inject;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.mvc.Controller;
-import play.mvc.Result;
 
-public class RepositoryController extends Controller {
+public class RepositoryService {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
   private final Config config;
 
   @Inject
-  public RepositoryController(Config config) {
+  public RepositoryService(Config config) {
     this.config = config;
   }
 
-  public Result init(List<Class<? extends BaseEntity>> entities) {
-    createDatabase(entities);
-    return ok("init complete");
-  }
-
-  public void createDatabase(List<Class<? extends BaseEntity>> entities) {
+  public void createCollections(List<Class<? extends BaseEntity>> entities, boolean withHistory) {
     try (final MongoClient mongoClient = new MongoClient()) {
-      var database = mongoClient.getDatabase(config.getString("db.name"));
-      createCollections(entities, database);
+      var database = mongoClient.getDatabase(config.getString("morphia.database"));
+      createCollections(database, entities, withHistory);
     }
   }
 
   private void createCollections(
-      List<Class<? extends BaseEntity>> entities, MongoDatabase database) {
+      MongoDatabase database, List<Class<? extends BaseEntity>> entities, boolean withHistory) {
     final var schemaGeneratorConfig = getSchemaGeneratorConfig();
     entities.forEach(
         entity -> {
@@ -51,23 +46,52 @@ public class RepositoryController extends Controller {
           var validationOptions =
               new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
-          if (isCollectionInDatabase(entity.getSimpleName(), database)) {
-            logger.debug("already exists");
+          createCollection(database, entity.getSimpleName(), schema, validationOptions);
 
-            database.runCommand(
-                new Document("collMod", entity.getSimpleName())
-                    .append("validator", Filters.jsonSchema(Document.parse(schema)))
-                    .append("validationLevel", "strict"));
-            // default values are added by setting the variable in its respective class with an
-            // initial value
-          } else {
-            database.createCollection(
-                entity.getSimpleName(),
-                new CreateCollectionOptions().validationOptions(validationOptions));
+          if (withHistory) {
+            createCollection(
+                database, entity.getSimpleName() + "_history", schema, validationOptions);
+
+            // todo uncomment after history is implemented throughout the application
+            // createIndex(database, entity.getSimpleName(), "trackingId", true);
+            createIndex(database, entity.getSimpleName() + "_history", "trackingId", false);
           }
 
           logger.debug("{}", schema);
         });
+  }
+
+  private void createIndex(
+      MongoDatabase database, String entityName, String fieldName, Boolean unique) {
+    final var collection = database.getCollection(entityName);
+
+    for (final var index : collection.listIndexes()) {
+      if (index.getString("name").equals(fieldName + "_idx")) {
+        collection.dropIndex(fieldName + "_idx");
+        break;
+      }
+    }
+
+    collection.createIndex(
+        Indexes.ascending(fieldName), new IndexOptions().name(fieldName + "_idx").unique(unique));
+  }
+
+  private void createCollection(
+      MongoDatabase database,
+      String entityName,
+      String schema,
+      ValidationOptions validationOptions) {
+    if (isCollectionInDatabase(entityName, database)) {
+      logger.debug("already exists");
+
+      database.runCommand(
+          new Document("collMod", entityName)
+              .append("validator", Filters.jsonSchema(Document.parse(schema)))
+              .append("validationLevel", "strict"));
+    } else {
+      database.createCollection(
+          entityName, new CreateCollectionOptions().validationOptions(validationOptions));
+    }
   }
 
   public boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
