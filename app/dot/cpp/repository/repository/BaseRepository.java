@@ -47,7 +47,7 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   @NotNull
-  private static FindOptions getNewOptions(int skip, int limit) {
+  private static FindOptions getFindOptions(int skip, int limit) {
     return new FindOptions().skip(skip).limit(limit);
   }
 
@@ -68,7 +68,7 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> list(Filter filter, int skip, int limit, Sort... sortBy) {
-    try (final var it = getFindQuery(filter).iterator(getNewOptions(skip, limit).sort(sortBy))) {
+    try (final var it = getFindQuery(filter).iterator(getFindOptions(skip, limit).sort(sortBy))) {
       return it.toList();
     }
   }
