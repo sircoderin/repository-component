@@ -10,7 +10,6 @@ import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.jetbrains.annotations.NotNull;
 
 @Singleton
 public class MorphiaService {
