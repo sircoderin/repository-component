@@ -46,6 +46,11 @@ public class BaseRepository<T extends BaseEntity> {
     return new FindOptions().skip(pageNum * pageSize).limit(pageSize);
   }
 
+  @NotNull
+  private static FindOptions getFindOptions(int skip, int limit) {
+    return new FindOptions().skip(skip).limit(limit);
+  }
+
   public T findById(ObjectId id) {
     return getFindQuery(Filters.eq("_id", id)).first();
   }
@@ -62,8 +67,8 @@ public class BaseRepository<T extends BaseEntity> {
     return getFindQuery(Filters.eq(field, value)).first();
   }
 
-  public List<T> listByField(String field, String value, Sort... sortBy) {
-    try (final var it = getFindQuery(Filters.eq(field, value)).iterator(getSortOptions(sortBy))) {
+  public List<T> list(Filter filter, int skip, int limit, Sort... sortBy) {
+    try (final var it = getFindQuery(filter).iterator(getFindOptions(skip, limit).sort(sortBy))) {
       return it.toList();
     }
   }
@@ -74,11 +79,13 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  public List<T> listWithFilter(Filter filter, Sort... sortBy) {
-    if (filter == null) {
-      return List.of();
+  public List<T> listByField(String field, String value, Sort... sortBy) {
+    try (final var it = getFindQuery(Filters.eq(field, value)).iterator(getSortOptions(sortBy))) {
+      return it.toList();
     }
+  }
 
+  public List<T> listWithFilter(Filter filter, Sort... sortBy) {
     try (final var it = getFindQuery(filter).iterator(getSortOptions(sortBy))) {
       return it.toList();
     }
@@ -91,10 +98,6 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> listWithFilterPaginated(Filter filter, int pageSize, int pageNum, Sort... sortBy) {
-    if (filter == null) {
-      return List.of();
-    }
-
     try (final var it = getFindQuery(filter).iterator(getOptions(pageSize, pageNum).sort(sortBy))) {
       return it.toList();
     }
@@ -109,18 +112,6 @@ public class BaseRepository<T extends BaseEntity> {
         .forEach(historyEntities::add);
 
     return historyEntities;
-  }
-
-  /**
-   * Morphia sets the codec registries automatically from the POJOs, but the Mongo client needs manual setup
-   * History collections must be initialized using {@link RepositoryService} to support indexing
-   */
-  @NotNull
-  private MongoCollection<T> getHistoryCollection() {
-    return morphia
-        .datastore()
-        .getDatabase()
-        .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
   }
 
   public long count() {
@@ -192,7 +183,7 @@ public class BaseRepository<T extends BaseEntity> {
 
   @NotNull
   protected Query<T> getFindQuery(Filter filter) {
-    return getFindQuery().filter(filter);
+    return filter != null ? getFindQuery().filter(filter) : getFindQuery();
   }
 
   @NotNull
@@ -202,7 +193,7 @@ public class BaseRepository<T extends BaseEntity> {
 
   @NotNull
   protected Aggregation<T> getAggregation(Filter filter) {
-    return getAggregation().match(filter);
+    return filter != null ? getAggregation().match(filter) : getAggregation();
   }
 
   @SuppressWarnings("unchecked")
@@ -210,5 +201,17 @@ public class BaseRepository<T extends BaseEntity> {
     final var superType = (ParameterizedType) getClass().getGenericSuperclass();
     final var superTypes = superType.getActualTypeArguments();
     return ((Class<T>) superTypes[0]);
+  }
+
+  /**
+   * Morphia sets the codec registries automatically from the POJOs, but the Mongo client needs manual setup
+   * History collections must be initialized using {@link RepositoryService} to support indexing
+   */
+  @NotNull
+  private MongoCollection<T> getHistoryCollection() {
+    return morphia
+        .datastore()
+        .getDatabase()
+        .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
   }
 }
