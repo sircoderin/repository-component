@@ -1,5 +1,7 @@
 package dot.cpp.repository.services;
 
+import static dot.cpp.repository.models.BaseEntity.RECORD_ID_FIELD;
+
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
@@ -53,8 +55,8 @@ public class RepositoryService {
                 database, entity.getSimpleName() + "_history", schema, validationOptions);
 
             // todo uncomment after history is implemented throughout the application
-            // createIndex(database, entity.getSimpleName(), "trackingId", true);
-            createIndex(database, entity.getSimpleName() + "_history", "trackingId", false);
+            // createIndex(database, entity.getSimpleName(), RECORD_ID_FIELD, true);
+            createIndex(database, entity.getSimpleName() + "_history", RECORD_ID_FIELD, false);
           }
 
           logger.debug("{}", schema);

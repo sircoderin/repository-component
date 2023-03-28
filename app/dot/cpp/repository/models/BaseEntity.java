@@ -1,15 +1,17 @@
 package dot.cpp.repository.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.morphia.annotations.Id;
+import java.util.UUID;
 import org.bson.types.ObjectId;
 import play.libs.Json;
 
 public abstract class BaseEntity {
 
+  public static final String RECORD_ID_FIELD = "recordId";
+
   @Id protected ObjectId id;
 
-  protected String trackingId;
+  protected String recordId = UUID.randomUUID().toString();
 
   /** Date and time of the last modification as UNIX timestamp. */
   protected Long modifiedAt;
@@ -24,22 +26,13 @@ public abstract class BaseEntity {
     return id;
   }
 
-  @JsonProperty("strId")
-  public String getStrId() {
-    return id != null ? id.toString() : "";
-  }
-
   public BaseEntity setId(ObjectId id) {
     this.id = id;
     return this;
   }
 
-  public String getTrackingId() {
-    return trackingId;
-  }
-
-  public void setTrackingId(String trackingId) {
-    this.trackingId = trackingId;
+  public String getRecordId() {
+    return recordId;
   }
 
   public Long getModifiedAt() {
