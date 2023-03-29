@@ -2,6 +2,7 @@ package dot.cpp.repository.repository;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Sorts.descending;
+import static dot.cpp.repository.models.BaseEntity.RECORD_ID_FIELD;
 
 import com.mongodb.client.MongoCollection;
 import dev.morphia.aggregation.Aggregation;
@@ -22,7 +23,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 import javax.inject.Inject;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -33,8 +33,7 @@ public class BaseRepository<T extends BaseEntity> {
 
   private static final String INITIAL = "initial";
   private final Logger logger = LoggerFactory.getLogger(getClass());
-  @Inject
-  private MorphiaService morphia;
+  @Inject private MorphiaService morphia;
 
   @NotNull
   protected static FindOptions getSortOptions(Sort[] sortBy) {
@@ -51,16 +50,12 @@ public class BaseRepository<T extends BaseEntity> {
     return new FindOptions().skip(skip).limit(limit);
   }
 
-  public T findById(ObjectId id) {
-    return getFindQuery(Filters.eq("_id", id)).first();
-  }
-
   public T findById(String id) {
-    return findById(new ObjectId(id));
+    return getFindQuery(Filters.eq(RECORD_ID_FIELD, id)).first();
   }
 
   public T findByHistoryId(String id) {
-    return getHistoryCollection().find(eq("_id", new ObjectId(id))).first();
+    return getHistoryCollection().find(eq(RECORD_ID_FIELD, id)).first();
   }
 
   public T findByField(String field, String value) {
@@ -103,11 +98,11 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  public List<T> listHistory(String trackingId) {
+  public List<T> listHistory(String recordId) {
     final var historyEntities = new ArrayList<T>();
 
     getHistoryCollection()
-        .find(eq("trackingId", trackingId))
+        .find(eq(RECORD_ID_FIELD, recordId))
         .sort(descending("modifiedAt"))
         .forEach(historyEntities::add);
 
@@ -150,12 +145,11 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public void saveWithHistory(T entity) {
-    final var currentEntity = findById(entity.getId());
+    final var currentEntity = findById(entity.getRecordId());
 
     entity.setModifiedAt(Instant.now().getEpochSecond());
 
     if (currentEntity == null) {
-      entity.setTrackingId(UUID.randomUUID().toString());
       entity.setModifiedComment(INITIAL);
     } else {
       currentEntity.setId(new ObjectId());
@@ -204,8 +198,9 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   /**
-   * Morphia sets the codec registries automatically from the POJOs, but the Mongo client needs manual setup
-   * History collections must be initialized using {@link RepositoryService} to support indexing
+   * Morphia sets the codec registries automatically from the POJOs, but the Mongo client needs
+   * manual setup History collections must be initialized using {@link RepositoryService} to support
+   * indexing.
    */
   @NotNull
   private MongoCollection<T> getHistoryCollection() {
