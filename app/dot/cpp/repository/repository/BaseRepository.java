@@ -102,11 +102,11 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  public List<T> listHistoryRecords(String recordId) {
+  public List<T> listHistoryRecords(String id) {
     final var historyEntities = new ArrayList<T>();
 
     getHistoryCollection()
-        .find(eq(RECORD_ID_FIELD, recordId))
+        .find(eq(RECORD_ID_FIELD, id))
         .sort(descending(TIMESTAMP_FIELD))
         .forEach(historyEntities::add);
 
@@ -202,9 +202,8 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   /**
-   * Morphia sets the codec registries automatically from the POJOs, but the Mongo client needs
-   * manual setup History collections must be initialized using {@link RepositoryService} to support
-   * indexing.
+   * Morphia sets codec registries automatically from POJOs, but the Mongo client needs manual setup
+   * History collections must be initialized using {@link RepositoryService} to support indexing
    */
   @NotNull
   private MongoCollection<T> getHistoryCollection() {
