@@ -1,8 +1,10 @@
 package dot.cpp.repository.repository;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Sorts.descending;
 import static dot.cpp.repository.models.BaseEntity.RECORD_ID_FIELD;
+import static dot.cpp.repository.models.BaseEntity.TIMESTAMP_FIELD;
 
 import com.mongodb.client.MongoCollection;
 import dev.morphia.aggregation.Aggregation;
@@ -54,8 +56,10 @@ public class BaseRepository<T extends BaseEntity> {
     return getFindQuery(Filters.eq(RECORD_ID_FIELD, id)).first();
   }
 
-  public T findByHistoryId(String id) {
-    return getHistoryCollection().find(eq(RECORD_ID_FIELD, id)).first();
+  public T findHistoryRecord(String id, Long timestamp) {
+    return getHistoryCollection()
+        .find(and(eq(RECORD_ID_FIELD, id), eq(TIMESTAMP_FIELD, timestamp)))
+        .first();
   }
 
   public T findByField(String field, String value) {
@@ -98,12 +102,12 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  public List<T> listHistory(String recordId) {
+  public List<T> listHistoryRecords(String id) {
     final var historyEntities = new ArrayList<T>();
 
     getHistoryCollection()
-        .find(eq(RECORD_ID_FIELD, recordId))
-        .sort(descending("modifiedAt"))
+        .find(eq(RECORD_ID_FIELD, id))
+        .sort(descending(TIMESTAMP_FIELD))
         .forEach(historyEntities::add);
 
     return historyEntities;
@@ -198,9 +202,8 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   /**
-   * Morphia sets the codec registries automatically from the POJOs, but the Mongo client needs
-   * manual setup History collections must be initialized using {@link RepositoryService} to support
-   * indexing.
+   * Morphia sets codec registries automatically from POJOs, but the Mongo client needs manual setup
+   * History collections must be initialized using {@link RepositoryService} to support indexing
    */
   @NotNull
   private MongoCollection<T> getHistoryCollection() {

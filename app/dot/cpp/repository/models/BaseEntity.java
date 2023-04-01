@@ -8,6 +8,7 @@ import play.libs.Json;
 public abstract class BaseEntity {
 
   public static final String RECORD_ID_FIELD = "recordId";
+  public static final String TIMESTAMP_FIELD = "modifiedAt";
 
   @Id protected ObjectId id;
 
