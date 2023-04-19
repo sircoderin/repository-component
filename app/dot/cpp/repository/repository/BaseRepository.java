@@ -3,8 +3,8 @@ package dot.cpp.repository.repository;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Sorts.descending;
-import static dot.cpp.repository.models.BaseEntity.RECORD_ID_FIELD;
-import static dot.cpp.repository.models.BaseEntity.TIMESTAMP_FIELD;
+import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
+import static dot.cpp.repository.models.BaseEntity.TIMESTAMP;
 
 import com.mongodb.client.MongoCollection;
 import dev.morphia.aggregation.Aggregation;
@@ -53,13 +53,11 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public T findById(String id) {
-    return getFindQuery(Filters.eq(RECORD_ID_FIELD, id)).first();
+    return getFindQuery(Filters.eq(RECORD_ID, id)).first();
   }
 
   public T findHistoryRecord(String id, Long timestamp) {
-    return getHistoryCollection()
-        .find(and(eq(RECORD_ID_FIELD, id), eq(TIMESTAMP_FIELD, timestamp)))
-        .first();
+    return getHistoryCollection().find(and(eq(RECORD_ID, id), eq(TIMESTAMP, timestamp))).first();
   }
 
   public T findByField(String field, String value) {
@@ -106,8 +104,8 @@ public class BaseRepository<T extends BaseEntity> {
     final var historyEntities = new ArrayList<T>();
 
     getHistoryCollection()
-        .find(eq(RECORD_ID_FIELD, id))
-        .sort(descending(TIMESTAMP_FIELD))
+        .find(eq(RECORD_ID, id))
+        .sort(descending(TIMESTAMP))
         .forEach(historyEntities::add);
 
     return historyEntities;
