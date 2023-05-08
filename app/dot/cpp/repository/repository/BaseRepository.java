@@ -17,6 +17,7 @@ import dev.morphia.query.Query;
 import dev.morphia.query.Sort;
 import dev.morphia.query.filters.Filter;
 import dev.morphia.query.filters.Filters;
+import dev.morphia.query.updates.UpdateOperators;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
 import dot.cpp.repository.services.RepositoryService;
@@ -50,6 +51,10 @@ public class BaseRepository<T extends BaseEntity> {
   @NotNull
   private static FindOptions getFindOptions(int skip, int limit) {
     return new FindOptions().skip(skip).limit(limit);
+  }
+
+  public T find(Filter filter) {
+    return getFindQuery(filter).first();
   }
 
   public T findById(String id) {
@@ -146,7 +151,7 @@ public class BaseRepository<T extends BaseEntity> {
     }
   }
 
-  public void saveWithHistory(T entity) {
+  public T saveWithHistory(T entity) {
     final var currentEntity = findById(entity.getRecordId());
 
     entity.setModifiedAt(Instant.now().getEpochSecond());
@@ -160,11 +165,14 @@ public class BaseRepository<T extends BaseEntity> {
 
     final var savedEntity = morphia.datastore().save(entity);
     logger.debug("saved {}", savedEntity);
+
+    return savedEntity;
   }
 
-  public void save(T entity) {
+  public T save(T entity) {
     final var savedEntity = morphia.datastore().save(entity);
     logger.debug("saved {}", savedEntity);
+    return savedEntity;
   }
 
   public void delete(T entity) {

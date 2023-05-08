@@ -36,6 +36,10 @@ public abstract class BaseEntity {
     return recordId;
   }
 
+  public void setRecordId(String recordId) {
+    this.recordId = recordId;
+  }
+
   public Long getModifiedAt() {
     return modifiedAt;
   }
