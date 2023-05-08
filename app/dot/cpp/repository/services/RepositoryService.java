@@ -1,6 +1,6 @@
 package dot.cpp.repository.services;
 
-import static dot.cpp.repository.models.BaseEntity.RECORD_ID_FIELD;
+import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -54,8 +54,8 @@ public class RepositoryService {
             createCollection(
                 database, entity.getSimpleName() + "_history", schema, validationOptions);
 
-            createIndex(database, entity.getSimpleName(), RECORD_ID_FIELD, true);
-            createIndex(database, entity.getSimpleName() + "_history", RECORD_ID_FIELD, false);
+            createIndex(database, entity.getSimpleName(), RECORD_ID, true);
+            createIndex(database, entity.getSimpleName() + "_history", RECORD_ID, false);
           }
 
           logger.debug("{}", schema);
