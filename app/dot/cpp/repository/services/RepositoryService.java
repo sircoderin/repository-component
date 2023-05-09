@@ -95,6 +95,14 @@ public class RepositoryService {
     }
   }
 
+  public void emptyCollection(Class<? extends BaseEntity> entity) {
+    try (final MongoClient mongoClient = new MongoClient()) {
+      var database = mongoClient.getDatabase(config.getString("morphia.database"));
+      database.getCollection(entity.getSimpleName()).drop();
+      createCollections(database, List.of(entity), false);
+    }
+  }
+
   public boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
     final var collectionNames = database.listCollectionNames();
     return collectionNames.into(new ArrayList<>()).contains(collectionName);

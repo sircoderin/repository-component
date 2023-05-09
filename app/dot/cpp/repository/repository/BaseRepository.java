@@ -7,6 +7,7 @@ import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 import static dot.cpp.repository.models.BaseEntity.TIMESTAMP;
 
 import com.mongodb.client.MongoCollection;
+import dev.morphia.DeleteOptions;
 import dev.morphia.aggregation.Aggregation;
 import dev.morphia.aggregation.expressions.AccumulatorExpressions;
 import dev.morphia.aggregation.expressions.Expressions;
@@ -174,9 +175,17 @@ public class BaseRepository<T extends BaseEntity> {
     return savedEntity;
   }
 
+  public List<T> save(List<T> entities) {
+    return morphia.datastore().save(entities);
+  }
+
   public void delete(T entity) {
     morphia.datastore().delete(entity);
     logger.debug("deleted {}", entity);
+  }
+
+  public long deleteWithFilter(Filter filter) {
+    return getFindQuery(filter).delete(new DeleteOptions().multi(true)).getDeletedCount();
   }
 
   @NotNull
