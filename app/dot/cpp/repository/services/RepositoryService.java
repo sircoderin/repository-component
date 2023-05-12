@@ -33,8 +33,8 @@ public class RepositoryService {
   }
 
   public void createCollections(List<Class<? extends BaseEntity>> entities, boolean withHistory) {
-    try (final MongoClient mongoClient = new MongoClient()) {
-      var database = mongoClient.getDatabase(config.getString("morphia.database"));
+    try (final var mongoClient = new MongoClient()) {
+      final var database = mongoClient.getDatabase(config.getString("morphia.database"));
       createCollections(database, entities, withHistory);
     }
   }
@@ -92,6 +92,14 @@ public class RepositoryService {
     } else {
       database.createCollection(
           entityName, new CreateCollectionOptions().validationOptions(validationOptions));
+    }
+  }
+
+  public void emptyCollection(Class<? extends BaseEntity> entity) {
+    try (final var mongoClient = new MongoClient()) {
+      final var database = mongoClient.getDatabase(config.getString("morphia.database"));
+      database.getCollection(entity.getSimpleName()).drop();
+      createCollections(database, List.of(entity), false);
     }
   }
 
