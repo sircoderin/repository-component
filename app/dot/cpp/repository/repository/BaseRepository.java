@@ -53,8 +53,20 @@ public class BaseRepository<T extends BaseEntity> {
     return new FindOptions().skip(skip).limit(limit);
   }
 
-  public T find(Filter filter) {
+  public T findFirst(Filter filter) {
     return getFindQuery(filter).first();
+  }
+
+  public T findFirst(Sort sort) {
+    try (final var it = getFindQuery().iterator(new FindOptions().sort(sort).limit(1))) {
+      return it.tryNext();
+    }
+  }
+
+  public T findFirst(Filter filter, Sort sort) {
+    try (final var it = getFindQuery(filter).iterator(new FindOptions().sort(sort).limit(1))) {
+      return it.tryNext();
+    }
   }
 
   public T findById(String id) {
@@ -143,12 +155,6 @@ public class BaseRepository<T extends BaseEntity> {
   @NotNull
   protected Group getSumGroup(String field) {
     return Group.group().field("sum", AccumulatorExpressions.sum(Expressions.field(field)));
-  }
-
-  public T getFirstSorted(Sort sort) {
-    try (final var it = getFindQuery().iterator(new FindOptions().sort(sort).limit(1))) {
-      return it.tryNext();
-    }
   }
 
   public T saveWithHistory(T entity) {
