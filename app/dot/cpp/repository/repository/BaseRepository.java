@@ -7,8 +7,10 @@ import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 import static dot.cpp.repository.models.BaseEntity.TIMESTAMP;
 
 import com.mongodb.client.MongoCollection;
+import dev.morphia.DatastoreImpl;
 import dev.morphia.DeleteOptions;
 import dev.morphia.aggregation.Aggregation;
+import dev.morphia.aggregation.AggregationImpl;
 import dev.morphia.aggregation.expressions.AccumulatorExpressions;
 import dev.morphia.aggregation.expressions.Expressions;
 import dev.morphia.aggregation.stages.Group;
@@ -231,5 +233,17 @@ public class BaseRepository<T extends BaseEntity> {
         .datastore()
         .getDatabase()
         .getCollection(getEntityType().getSimpleName() + "_history", getEntityType());
+  }
+
+  @NotNull
+  protected Aggregation<T> getHistoryAggregation(Filter filter) {
+    final var historyAggregation =
+        new AggregationImpl<>(
+            (DatastoreImpl) morphia.datastore(),
+            morphia
+                .datastore()
+                .getDatabase()
+                .getCollection(getEntityType().getSimpleName() + "_history", getEntityType()));
+    return filter != null ? historyAggregation.match(filter) : historyAggregation;
   }
 }
