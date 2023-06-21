@@ -1,12 +1,13 @@
 package dot.cpp.repository.repository;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Sorts.descending;
+import static dev.morphia.query.filters.Filters.and;
+import static dev.morphia.query.filters.Filters.eq;
 import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 import static dot.cpp.repository.models.BaseEntity.TIMESTAMP;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import dev.morphia.DatastoreImpl;
 import dev.morphia.DeleteOptions;
 import dev.morphia.aggregation.Aggregation;
@@ -19,7 +20,6 @@ import dev.morphia.query.MorphiaCursor;
 import dev.morphia.query.Query;
 import dev.morphia.query.Sort;
 import dev.morphia.query.filters.Filter;
-import dev.morphia.query.filters.Filters;
 import dot.cpp.repository.models.BaseEntity;
 import dot.cpp.repository.mongodb.MorphiaService;
 import dot.cpp.repository.services.RepositoryService;
@@ -72,15 +72,17 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public T findById(String id) {
-    return getFindQuery(Filters.eq(RECORD_ID, id)).first();
+    return getFindQuery(eq(RECORD_ID, id)).first();
   }
 
   public T findHistoryRecord(String id, Long timestamp) {
-    return getHistoryCollection().find(and(eq(RECORD_ID, id), eq(TIMESTAMP, timestamp))).first();
+    return getHistoryCollection()
+        .find(Filters.and(Filters.eq(RECORD_ID, id), Filters.eq(TIMESTAMP, timestamp)))
+        .first();
   }
 
   public T findByField(String field, String value) {
-    return getFindQuery(Filters.eq(field, value)).first();
+    return getFindQuery(eq(field, value)).first();
   }
 
   public List<T> list(Filter filter, int skip, int limit, Sort... sortBy) {
@@ -96,7 +98,7 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public List<T> listByField(String field, String value, Sort... sortBy) {
-    try (final var it = getFindQuery(Filters.eq(field, value)).iterator(getSortOptions(sortBy))) {
+    try (final var it = getFindQuery(eq(field, value)).iterator(getSortOptions(sortBy))) {
       return it.toList();
     }
   }
@@ -123,8 +125,8 @@ public class BaseRepository<T extends BaseEntity> {
     final var historyEntities = new ArrayList<T>();
 
     getHistoryCollection()
-        .find(eq(RECORD_ID, id))
-        .sort(descending(TIMESTAMP))
+        .find(Filters.eq(RECORD_ID, id))
+        .sort(Sorts.descending(TIMESTAMP))
         .forEach(historyEntities::add);
 
     return historyEntities;
@@ -216,6 +218,13 @@ public class BaseRepository<T extends BaseEntity> {
     return filter != null ? getAggregation().match(filter) : getAggregation();
   }
 
+  @NotNull
+  protected Aggregation<T> getAggregation(String id, long timestamp) {
+    return timestamp != 0L
+        ? getHistoryAggregation(and(eq(RECORD_ID, id), eq(TIMESTAMP, timestamp)))
+        : getAggregation(eq(RECORD_ID, id));
+  }
+
   @SuppressWarnings("unchecked")
   protected Class<T> getEntityType() {
     final var superType = (ParameterizedType) getClass().getGenericSuperclass();
@@ -224,11 +233,12 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   /**
-   * Morphia sets codec registries automatically from POJOs, but the Mongo client needs manual setup
-   * History collections must be initialized using {@link RepositoryService} to support indexing
+   * Morphia sets codec registries automatically from POJOs, but the Mongo client needs manual
+   * setup. History collections must be initialized using {@link RepositoryService} to support
+   * indexing.
    */
   @NotNull
-  private MongoCollection<T> getHistoryCollection() {
+  protected MongoCollection<T> getHistoryCollection() {
     return morphia
         .datastore()
         .getDatabase()
