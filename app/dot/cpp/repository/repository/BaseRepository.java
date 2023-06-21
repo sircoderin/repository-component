@@ -218,6 +218,13 @@ public class BaseRepository<T extends BaseEntity> {
     return filter != null ? getAggregation().match(filter) : getAggregation();
   }
 
+  @NotNull
+  protected Aggregation<T> getAggregation(String id, long timestamp) {
+    return timestamp != 0L
+        ? getHistoryAggregation(and(eq(RECORD_ID, id), eq(TIMESTAMP, timestamp)))
+        : getAggregation(eq(RECORD_ID, id));
+  }
+
   @SuppressWarnings("unchecked")
   protected Class<T> getEntityType() {
     final var superType = (ParameterizedType) getClass().getGenericSuperclass();
@@ -230,7 +237,7 @@ public class BaseRepository<T extends BaseEntity> {
    * History collections must be initialized using {@link RepositoryService} to support indexing
    */
   @NotNull
-  private MongoCollection<T> getHistoryCollection() {
+  protected MongoCollection<T> getHistoryCollection() {
     return morphia
         .datastore()
         .getDatabase()
@@ -247,12 +254,5 @@ public class BaseRepository<T extends BaseEntity> {
                 .getDatabase()
                 .getCollection(getEntityType().getSimpleName() + "_history", getEntityType()));
     return filter != null ? historyAggregation.match(filter) : historyAggregation;
-  }
-
-  @NotNull
-  public Aggregation<T> getFindAggregation(String id, long timestamp) {
-    return timestamp != 0L
-        ? getHistoryAggregation(and(eq(RECORD_ID, id), eq(TIMESTAMP, timestamp)))
-        : getAggregation(eq(RECORD_ID, id));
   }
 }
