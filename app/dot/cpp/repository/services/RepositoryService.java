@@ -2,7 +2,6 @@ package dot.cpp.repository.services;
 
 import static com.mongodb.client.model.Indexes.ascending;
 import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
-import static dot.cpp.repository.models.Index.index;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -34,6 +33,31 @@ public class RepositoryService {
   }
 
   @SafeVarargs
+  private void createCollections(
+      MongoDatabase database, boolean withHistory, Class<? extends BaseEntity>... entities) {
+    final var schemaGeneratorConfig = getSchemaGeneratorConfig();
+
+    for (var entity : entities) {
+      var schema = getSchema(entity, schemaGeneratorConfig);
+      var validationOptions =
+          new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
+
+      createCollection(database, entity.getSimpleName(), schema, validationOptions);
+      createIndexes(database, Index.from(entity, RECORD_ID, ascending(RECORD_ID), true));
+
+      if (withHistory) {
+        createCollection(database, entity.getSimpleName() + "_history", schema, validationOptions);
+        createIndexes(
+            database,
+            Index.from(
+                entity.getSimpleName() + "_history", RECORD_ID, ascending(RECORD_ID), false));
+      }
+
+      logger.debug("{}", schema);
+    }
+  }
+
+  @SafeVarargs
   public final void createCollections(Class<? extends BaseEntity>... entities) {
     try (final var mongoClient = new MongoClient()) {
       final var database = getDatabase(mongoClient);
@@ -46,30 +70,6 @@ public class RepositoryService {
     try (final var mongoClient = new MongoClient()) {
       final var database = getDatabase(mongoClient);
       createCollections(database, true, entities);
-    }
-  }
-
-  @SafeVarargs
-  private void createCollections(
-      MongoDatabase database, boolean withHistory, Class<? extends BaseEntity>... entities) {
-    final var schemaGeneratorConfig = getSchemaGeneratorConfig();
-
-    for (var entity : entities) {
-      var schema = getSchema(entity, schemaGeneratorConfig);
-      var validationOptions =
-          new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
-
-      createCollection(database, entity.getSimpleName(), schema, validationOptions);
-      createIndexes(database, index(entity, RECORD_ID, ascending(RECORD_ID), true));
-
-      if (withHistory) {
-        createCollection(database, entity.getSimpleName() + "_history", schema, validationOptions);
-        createIndexes(
-            database,
-            index(entity.getSimpleName() + "_history", RECORD_ID, ascending(RECORD_ID), false));
-      }
-
-      logger.debug("{}", schema);
     }
   }
 
@@ -91,7 +91,8 @@ public class RepositoryService {
         }
       }
 
-      collection.createIndex(idx.spec, new IndexOptions().name(idx.name).unique(idx.unique));
+      collection.createIndex(
+          idx.specification, new IndexOptions().name(idx.name).unique(idx.unique));
     }
   }
 

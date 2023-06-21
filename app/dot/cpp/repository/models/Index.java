@@ -6,21 +6,22 @@ public class Index {
 
   public final String collectionName;
   public final String name;
-  public final Bson spec;
+  public final Bson specification;
   public final boolean unique;
 
-  public Index(String collectionName, String name, Bson spec, boolean unique) {
+  public Index(String collectionName, String name, Bson specification, boolean unique) {
     this.collectionName = collectionName;
     this.name = name;
-    this.spec = spec;
+    this.specification = specification;
     this.unique = unique;
   }
 
-  public static Index index(String collectionName, String indexName, Bson spec, boolean unique) {
-    return new Index(collectionName, indexName, spec, unique);
+  public static Index from(
+      String collectionName, String indexName, Bson specification, boolean unique) {
+    return new Index(collectionName, indexName, specification, unique);
   }
 
-  public static Index index(Class<?> clazz, String indexName, Bson spec, boolean unique) {
-    return new Index(clazz.getSimpleName(), indexName, spec, unique);
+  public static Index from(Class<?> clazz, String indexName, Bson specification, boolean unique) {
+    return new Index(clazz.getSimpleName(), indexName, specification, unique);
   }
 }

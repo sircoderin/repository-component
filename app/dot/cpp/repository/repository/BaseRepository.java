@@ -233,8 +233,9 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   /**
-   * Morphia sets codec registries automatically from POJOs, but the Mongo client needs manual setup
-   * History collections must be initialized using {@link RepositoryService} to support indexing
+   * Morphia sets codec registries automatically from POJOs, but the Mongo client needs manual
+   * setup. History collections must be initialized using {@link RepositoryService} to support
+   * indexing.
    */
   @NotNull
   protected MongoCollection<T> getHistoryCollection() {
