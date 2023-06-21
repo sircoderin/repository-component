@@ -62,13 +62,6 @@ public class RepositoryService {
         });
   }
 
-  public void createIndex(Class<? extends BaseEntity> entity, String fieldName, Boolean unique) {
-    try (final var mongoClient = new MongoClient()) {
-      final var database = mongoClient.getDatabase(config.getString("morphia.database"));
-      createIndex(database, entity.getSimpleName(), fieldName, unique);
-    }
-  }
-
   private void createIndex(
       MongoDatabase database, String entityName, String fieldName, Boolean unique) {
     final var collection = database.getCollection(entityName);
