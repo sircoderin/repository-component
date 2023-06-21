@@ -72,6 +72,6 @@ public abstract class BaseEntity {
 
   @Override
   public String toString() {
-    return Json.stringify(Json.toJson(this));
+    return Json.toJson(this).toString();
   }
 }
