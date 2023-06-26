@@ -80,6 +80,34 @@ public class RepositoryService {
     }
   }
 
+  public void emptyCollection(Class<? extends BaseEntity> entity) {
+    try (final var mongoClient = new MongoClient()) {
+      final var database = getDatabase(mongoClient);
+      database.getCollection(entity.getSimpleName()).drop();
+      createCollections(database, false, entity);
+    }
+  }
+
+  public boolean isCollectionInDatabase(String collectionName) {
+    try (final var mongoClient = new MongoClient()) {
+      final var database = getDatabase(mongoClient);
+      return isCollectionInDatabase(collectionName, database);
+    }
+  }
+
+  private boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
+    final var collectionNames = database.listCollectionNames();
+    return collectionNames.into(new ArrayList<>()).contains(collectionName);
+  }
+
+  public String getSchema(
+      Class<? extends BaseEntity> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {
+    final var generator = new SchemaGenerator(schemaGeneratorConfig);
+    final var jsonSchemaAsObjectNode = generator.generateSchema(entityClass);
+    jsonSchemaAsObjectNode.remove("$schema");
+    return jsonSchemaAsObjectNode.toPrettyString();
+  }
+
   private void createIndexes(MongoDatabase database, Index... indexes) {
     for (var idx : indexes) {
       final var collection = database.getCollection(idx.collectionName);
@@ -114,19 +142,6 @@ public class RepositoryService {
     }
   }
 
-  public void emptyCollection(Class<? extends BaseEntity> entity) {
-    try (final var mongoClient = new MongoClient()) {
-      final var database = getDatabase(mongoClient);
-      database.getCollection(entity.getSimpleName()).drop();
-      createCollections(database, false, entity);
-    }
-  }
-
-  public boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
-    final var collectionNames = database.listCollectionNames();
-    return collectionNames.into(new ArrayList<>()).contains(collectionName);
-  }
-
   private MongoDatabase getDatabase(MongoClient mongoClient) {
     return mongoClient.getDatabase(config.getString("morphia.database"));
   }
@@ -138,13 +153,5 @@ public class RepositoryService {
             .withNumberType(Integer.class)
             .withNumberType(Long.class);
     return new SchemaGeneratorBuilder().withModule(module).withConstraints().withInline().build();
-  }
-
-  public String getSchema(
-      Class<? extends BaseEntity> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {
-    final var generator = new SchemaGenerator(schemaGeneratorConfig);
-    final var jsonSchemaAsObjectNode = generator.generateSchema(entityClass);
-    jsonSchemaAsObjectNode.remove("$schema");
-    return jsonSchemaAsObjectNode.toPrettyString();
   }
 }
