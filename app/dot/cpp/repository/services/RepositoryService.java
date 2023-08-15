@@ -62,23 +62,20 @@ public class RepositoryService {
   @SafeVarargs
   public final void createCollections(Class<? extends BaseEntity>... entities) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
-      final var database = getDatabase(mongoClient);
-      createCollections(database, false, entities);
+      createCollections(getDatabase(mongoClient), false, entities);
     }
   }
 
   @SafeVarargs
   public final void createCollectionsWithHistory(Class<? extends BaseEntity>... entities) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
-      final var database = getDatabase(mongoClient);
-      createCollections(database, true, entities);
+      createCollections(getDatabase(mongoClient), true, entities);
     }
   }
 
   public void createIndexes(Index... indexes) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
-      final var database = getDatabase(mongoClient);
-      createIndexes(database, indexes);
+      createIndexes(getDatabase(mongoClient), indexes);
     }
   }
 
@@ -100,16 +97,15 @@ public class RepositoryService {
 
   public void emptyCollection(Class<? extends BaseEntity> entity) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
-      final var database = getDatabase(mongoClient);
-      database.getCollection(entity.getSimpleName()).drop();
-      createCollections(database, false, entity);
+      final var db = getDatabase(mongoClient);
+      db.getCollection(entity.getSimpleName()).drop();
+      createCollections(db, false, entity);
     }
   }
 
   public boolean isCollectionInDatabase(String collectionName) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
-      final var database = getDatabase(mongoClient);
-      return isCollectionInDatabase(collectionName, database);
+      return isCollectionInDatabase(collectionName, getDatabase(mongoClient));
     }
   }
 
