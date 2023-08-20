@@ -19,7 +19,6 @@ public class MorphiaService {
 
   @Inject
   public MorphiaService(Config config) {
-
     final var mongoClientSettings =
         MongoClientSettings.builder()
             .applyConnectionString(new ConnectionString(config.getString("morphia.uri")))
@@ -30,7 +29,6 @@ public class MorphiaService {
     datastore = Morphia.createDatastore(mongo, config.getString("morphia.database"), mapperOptions);
     datastore.getMapper().mapPackage(config.getString("morphia.login.models"));
     datastore.getMapper().mapPackage(config.getString("morphia.terra.models"));
-    datastore.ensureIndexes();
   }
 
   public MongoClient mongo() {

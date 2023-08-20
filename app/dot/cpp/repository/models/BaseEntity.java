@@ -1,6 +1,8 @@
 package dot.cpp.repository.models;
 
 import dev.morphia.annotations.Id;
+import dev.morphia.annotations.IndexOptions;
+import dev.morphia.annotations.Indexed;
 import java.util.UUID;
 import org.bson.types.ObjectId;
 import play.libs.Json;
@@ -12,6 +14,7 @@ public abstract class BaseEntity {
 
   @Id protected ObjectId id;
 
+  @Indexed(options = @IndexOptions(unique = true))
   protected String recordId = UUID.randomUUID().toString();
 
   /** Date and time of the last modification as UNIX timestamp. */
