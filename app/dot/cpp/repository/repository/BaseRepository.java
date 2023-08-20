@@ -219,6 +219,13 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   @NotNull
+  protected Aggregation<T> getAggregation(Filter filter, long timestamp) {
+    return timestamp != 0L
+        ? getHistoryAggregation(and(filter, eq(TIMESTAMP, timestamp)))
+        : getAggregation(filter);
+  }
+
+  @NotNull
   protected Aggregation<T> getAggregation(String id, long timestamp) {
     return timestamp != 0L
         ? getHistoryAggregation(and(eq(RECORD_ID, id), eq(TIMESTAMP, timestamp)))
