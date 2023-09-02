@@ -219,6 +219,12 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   @NotNull
+  protected Aggregation<T> getAggregation(Filter filter, int skip, int limit) {
+    final var aggregation = filter != null ? getAggregation().match(filter) : getAggregation();
+    return aggregation.skip(skip).limit(limit);
+  }
+
+  @NotNull
   protected Aggregation<T> getAggregation(Filter filter, long timestamp) {
     return timestamp != 0L
         ? getHistoryAggregation(and(filter, eq(TIMESTAMP, timestamp)))
