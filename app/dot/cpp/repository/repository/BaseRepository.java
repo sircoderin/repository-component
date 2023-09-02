@@ -220,8 +220,7 @@ public class BaseRepository<T extends BaseEntity> {
 
   @NotNull
   protected Aggregation<T> getAggregation(Filter filter, int skip, int limit) {
-    final var aggregation = filter != null ? getAggregation().match(filter) : getAggregation();
-    return aggregation.skip(skip).limit(limit);
+    return getAggregation(filter).skip(skip).limit(limit);
   }
 
   @NotNull
