@@ -271,7 +271,7 @@ public class BaseRepository<T extends BaseEntity> {
     return filter != null ? historyAggregation.match(filter) : historyAggregation;
   }
 
-  public void emptyCollection(Class<? extends BaseEntity> entity) {
-    morphia.datastore().getCollection(entity).drop();
+  public void emptyCollection() {
+    morphia.datastore().getCollection(getEntityType()).drop();
   }
 }
