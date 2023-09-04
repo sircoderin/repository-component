@@ -95,14 +95,6 @@ public class RepositoryService {
     }
   }
 
-  public void emptyCollection(Class<? extends BaseEntity> entity) {
-    try (final var mongoClient = new MongoClient(mongoUri)) {
-      final var db = getDatabase(mongoClient);
-      db.getCollection(entity.getSimpleName()).drop();
-      createCollections(db, false, entity);
-    }
-  }
-
   public boolean isCollectionInDatabase(String collectionName) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
       return isCollectionInDatabase(collectionName, getDatabase(mongoClient));

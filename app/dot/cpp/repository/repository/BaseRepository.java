@@ -5,6 +5,7 @@ import static dev.morphia.query.filters.Filters.eq;
 import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 import static dot.cpp.repository.models.BaseEntity.TIMESTAMP;
 
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
@@ -268,5 +269,9 @@ public class BaseRepository<T extends BaseEntity> {
                 .getDatabase()
                 .getCollection(getEntityType().getSimpleName() + "_history", getEntityType()));
     return filter != null ? historyAggregation.match(filter) : historyAggregation;
+  }
+
+  public void emptyCollection(Class<? extends BaseEntity> entity) {
+    morphia.datastore().getCollection(entity).drop();
   }
 }
