@@ -28,11 +28,13 @@ public class RepositoryService {
   private final Logger logger = LoggerFactory.getLogger(getClass());
   private final String mongoUri;
   private final String database;
+  private final SchemaGenerator schemaGenerator;
 
   @Inject
   public RepositoryService(Config config) {
     this.mongoUri = config.getString("morphia.uri");
     this.database = config.getString("morphia.database");
+    this.schemaGenerator = getSchemaGenerator();
   }
 
   @SafeVarargs
@@ -114,7 +116,7 @@ public class RepositoryService {
   }
 
   public String getSchema(Class<? extends BaseEntity> entityClass) {
-    final var jsonSchemaAsObjectNode = getSchemaGenerator().generateSchema(entityClass);
+    final var jsonSchemaAsObjectNode = schemaGenerator.generateSchema(entityClass);
     jsonSchemaAsObjectNode.remove("$schema");
     return jsonSchemaAsObjectNode.toPrettyString();
   }
@@ -141,7 +143,7 @@ public class RepositoryService {
     return mongoClient.getDatabase(database);
   }
 
-  private SchemaGenerator getSchemaGenerator() {
+  private static SchemaGenerator getSchemaGenerator() {
     final var module =
         SimpleTypeModule.forPrimitiveAndAdditionalTypes()
             .withNumberType(Byte.class)
