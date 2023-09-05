@@ -4,7 +4,6 @@ import static com.mongodb.client.model.Indexes.ascending;
 import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 
 import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -18,10 +17,12 @@ import dot.cpp.repository.models.Index;
 import dot.cpp.repository.mongodb.SchemaGeneratorBuilder;
 import java.util.ArrayList;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class RepositoryService {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -37,10 +38,8 @@ public class RepositoryService {
   @SafeVarargs
   private void createCollections(
       MongoDatabase database, boolean withHistory, Class<? extends BaseEntity>... entities) {
-    final var schemaGeneratorConfig = getSchemaGeneratorConfig();
-
     for (var entity : entities) {
-      var schema = getSchema(entity, schemaGeneratorConfig);
+      var schema = getSchema(entity);
       var validationOptions =
           new ValidationOptions().validator(Filters.jsonSchema(Document.parse(schema)));
 
@@ -95,6 +94,14 @@ public class RepositoryService {
     }
   }
 
+  public void emptyCollection(Class<? extends BaseEntity> entity) {
+    try (final var mongoClient = new MongoClient(mongoUri)) {
+      final var db = getDatabase(mongoClient);
+      db.getCollection(entity.getSimpleName()).drop();
+      createCollections(db, false, entity);
+    }
+  }
+
   public boolean isCollectionInDatabase(String collectionName) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
       return isCollectionInDatabase(collectionName, getDatabase(mongoClient));
@@ -106,10 +113,8 @@ public class RepositoryService {
     return collectionNames.into(new ArrayList<>()).contains(collectionName);
   }
 
-  public String getSchema(
-      Class<? extends BaseEntity> entityClass, SchemaGeneratorConfig schemaGeneratorConfig) {
-    final var generator = new SchemaGenerator(schemaGeneratorConfig);
-    final var jsonSchemaAsObjectNode = generator.generateSchema(entityClass);
+  public String getSchema(Class<? extends BaseEntity> entityClass) {
+    final var jsonSchemaAsObjectNode = getSchemaGenerator().generateSchema(entityClass);
     jsonSchemaAsObjectNode.remove("$schema");
     return jsonSchemaAsObjectNode.toPrettyString();
   }
@@ -136,12 +141,13 @@ public class RepositoryService {
     return mongoClient.getDatabase(database);
   }
 
-  private SchemaGeneratorConfig getSchemaGeneratorConfig() {
+  private SchemaGenerator getSchemaGenerator() {
     final var module =
         SimpleTypeModule.forPrimitiveAndAdditionalTypes()
             .withNumberType(Byte.class)
             .withNumberType(Integer.class)
             .withNumberType(Long.class);
-    return new SchemaGeneratorBuilder().withModule(module).withConstraints().withInline().build();
+    return new SchemaGenerator(
+        new SchemaGeneratorBuilder().withModule(module).withConstraints().withInline().build());
   }
 }

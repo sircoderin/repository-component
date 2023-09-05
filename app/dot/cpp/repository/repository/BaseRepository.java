@@ -5,7 +5,6 @@ import static dev.morphia.query.filters.Filters.eq;
 import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 import static dot.cpp.repository.models.BaseEntity.TIMESTAMP;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
@@ -30,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.inject.Inject;
-import org.bson.BsonDocument;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -41,6 +39,7 @@ public class BaseRepository<T extends BaseEntity> {
   private static final String INITIAL = "initial";
   private final Logger logger = LoggerFactory.getLogger(getClass());
   @Inject private MorphiaService morphia;
+  @Inject private RepositoryService repositoryService;
 
   @NotNull
   protected static FindOptions getSortOptions(Sort[] sortBy) {
@@ -273,6 +272,6 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public void emptyCollection() {
-    morphia.datastore().getCollection(getEntityType()).deleteMany(new BsonDocument());
+    repositoryService.emptyCollection(getEntityType());
   }
 }
