@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.inject.Inject;
+import org.bson.BsonDocument;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -272,6 +273,6 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public void emptyCollection() {
-    morphia.datastore().getCollection(getEntityType()).drop();
+    morphia.datastore().getCollection(getEntityType()).deleteMany(new BsonDocument());
   }
 }
