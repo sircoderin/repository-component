@@ -39,6 +39,7 @@ public class BaseRepository<T extends BaseEntity> {
   private static final String INITIAL = "initial";
   private final Logger logger = LoggerFactory.getLogger(getClass());
   @Inject private MorphiaService morphia;
+  @Inject private RepositoryService repositoryService;
 
   @NotNull
   protected static FindOptions getSortOptions(Sort[] sortBy) {
@@ -267,5 +268,9 @@ public class BaseRepository<T extends BaseEntity> {
                 .getDatabase()
                 .getCollection(getEntityType().getSimpleName() + "_history", getEntityType()));
     return filter != null ? historyAggregation.match(filter) : historyAggregation;
+  }
+
+  public void emptyCollection() {
+    repositoryService.emptyCollection(getEntityType());
   }
 }
