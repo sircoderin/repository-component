@@ -65,7 +65,7 @@ public class SchemaGeneratorBuilder {
 
   private SchemaGeneratorConfigBuilder getDefaultBuilder() {
     var configBuilder =
-        new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_7, OptionPreset.PLAIN_JSON)
+        new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
             .with(
                 new JacksonModule(
                     JacksonOption.IGNORE_TYPE_INFO_TRANSFORM,
