@@ -11,7 +11,7 @@ import org.bson.codecs.EncoderContext;
 
 public class YearMonthCodec implements Codec<YearMonth> {
 
-  public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MMM-yyyy");
+  public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
 
   @Override
   public void encode(BsonWriter writer, YearMonth yearMonth, EncoderContext encoderContext) {
