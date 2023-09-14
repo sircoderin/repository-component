@@ -10,6 +10,7 @@ import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.bson.codecs.configuration.CodecRegistries;
 
 @Singleton
 public class MorphiaService {
@@ -22,6 +23,10 @@ public class MorphiaService {
     final var mongoClientSettings =
         MongoClientSettings.builder()
             .applyConnectionString(new ConnectionString(config.getString("morphia.uri")))
+            .codecRegistry(
+                CodecRegistries.fromRegistries(
+                    MongoClientSettings.getDefaultCodecRegistry(),
+                    CodecRegistries.fromCodecs(new YearMonthCodec())))
             .build();
     final var mapperOptions = MapperOptions.builder().mapSubPackages(true).build();
 
