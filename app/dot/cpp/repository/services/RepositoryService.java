@@ -25,9 +25,13 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class RepositoryService {
 
+  public static final String USER_COLLECTION = "User";
+
   private final Logger logger = LoggerFactory.getLogger(getClass());
+
   private final String mongoUri;
   private final String database;
+  private boolean databaseInitialized = false;
   private final SchemaGenerator schemaGenerator;
 
   @Inject
@@ -104,10 +108,14 @@ public class RepositoryService {
     }
   }
 
-  public boolean isCollectionInDatabase(String collectionName) {
-    try (final var mongoClient = new MongoClient(mongoUri)) {
-      return isCollectionInDatabase(collectionName, getDatabase(mongoClient));
+  public boolean isDatabaseInitialized() {
+    if (!databaseInitialized) {
+      try (final var mongoClient = new MongoClient(mongoUri)) {
+        databaseInitialized = isCollectionInDatabase(USER_COLLECTION, getDatabase(mongoClient));
+      }
     }
+
+    return databaseInitialized;
   }
 
   private boolean isCollectionInDatabase(String collectionName, MongoDatabase database) {
