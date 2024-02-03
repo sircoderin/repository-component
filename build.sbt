@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
   "com.github.victools" % "jsonschema-module-javax-validation" % "4.28.0"
 )
 
-assemblyMergeStrategy in assembly := {
+assembly / assemblyMergeStrategy := {
   case PathList("META-INF", _*) => MergeStrategy.discard
   case _ => MergeStrategy.first
 }
