@@ -181,13 +181,22 @@ public class BaseRepository<T extends BaseEntity> {
   }
 
   public T save(T entity) {
+    entity.setModifiedAt(Instant.now().getEpochSecond());
+
     final var savedEntity = morphia.datastore().save(entity);
     logger.debug("saved {}", savedEntity);
+
     return savedEntity;
   }
 
   public List<T> save(List<T> entities) {
-    return morphia.datastore().save(entities);
+    final var timestamp = Instant.now().getEpochSecond();
+    entities.forEach(entity -> entity.setModifiedAt(timestamp));
+
+    final var savedEntities = morphia.datastore().save(entities);
+    logger.debug("saved entities{}", savedEntities);
+
+    return savedEntities;
   }
 
   public void delete(T entity) {
