@@ -38,6 +38,7 @@ public class BaseRepository<T extends BaseEntity> {
 
   private static final String INITIAL = "initial";
   private final Logger logger = LoggerFactory.getLogger(getClass());
+
   @Inject private MorphiaService morphia;
   @Inject private RepositoryService repositoryService;
 
@@ -231,6 +232,12 @@ public class BaseRepository<T extends BaseEntity> {
   @NotNull
   protected Aggregation<T> getAggregation(Filter filter, int skip, int limit) {
     return getAggregation(filter).skip(skip).limit(limit);
+  }
+
+  @NotNull
+  protected Aggregation<T> getAggregation(
+      Filter filter, dev.morphia.aggregation.stages.Sort sortBy, int skip, int limit) {
+    return getAggregation(filter).sort(sortBy).skip(skip).limit(limit);
   }
 
   @NotNull
