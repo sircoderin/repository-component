@@ -17,6 +17,9 @@ public abstract class BaseEntity {
   @Indexed(options = @IndexOptions(unique = true))
   protected String recordId = UUID.randomUUID().toString();
 
+  /** Date and time of creation as UNIX timestamp. */
+  protected Long createdAt;
+
   /** Date and time of the last modification as UNIX timestamp. */
   protected Long modifiedAt;
 
@@ -41,6 +44,14 @@ public abstract class BaseEntity {
 
   public void setRecordId(String recordId) {
     this.recordId = recordId;
+  }
+
+  public Long getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(Long createdAt) {
+    this.createdAt = createdAt;
   }
 
   public Long getModifiedAt() {
