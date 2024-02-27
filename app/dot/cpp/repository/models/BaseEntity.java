@@ -12,6 +12,7 @@ public abstract class BaseEntity {
 
   public static final String RECORD_ID = "recordId";
   public static final String TIMESTAMP = "modifiedAt";
+  public static final String CREATED_AT = "createdAt";
 
   @Id protected ObjectId id;
 
