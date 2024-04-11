@@ -176,7 +176,7 @@ public class BaseRepository<T extends BaseEntity> {
     }
 
     final var savedEntity = morphia.datastore().save(entity);
-    logger.debug("saved {}", savedEntity);
+    logger.debug("history save {}", savedEntity);
 
     return savedEntity;
   }
@@ -185,7 +185,7 @@ public class BaseRepository<T extends BaseEntity> {
     entity.setModifiedAt(Instant.now().getEpochSecond());
 
     final var savedEntity = morphia.datastore().save(entity);
-    logger.debug("saved {}", savedEntity);
+    logger.debug("save {}", savedEntity);
 
     return savedEntity;
   }
