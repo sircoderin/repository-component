@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.bson.types.ObjectId;
 import play.libs.Json;
 
-public abstract class BaseEntity {
+public abstract class BaseEntity implements Entity {
 
   public static final String RECORD_ID = "recordId";
   public static final String TIMESTAMP = "modifiedAt";
