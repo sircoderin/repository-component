@@ -2,6 +2,7 @@ package dot.cpp.repository.repository;
 
 import static dev.morphia.query.filters.Filters.and;
 import static dev.morphia.query.filters.Filters.eq;
+import static dev.morphia.query.filters.Filters.in;
 import static dot.cpp.repository.models.BaseEntity.RECORD_ID;
 import static dot.cpp.repository.models.BaseEntity.TIMESTAMP;
 
@@ -28,6 +29,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -75,6 +77,10 @@ public class BaseRepository<T extends BaseEntity> {
 
   public T findById(String id) {
     return getFindQuery(eq(RECORD_ID, id)).first();
+  }
+
+  public List<T> findByIds(List<String> ids) {
+    return getFindQuery(in(RECORD_ID, ids)).stream().collect(Collectors.toList());
   }
 
   public T findHistoryRecord(String id, Long timestamp) {
@@ -181,6 +187,30 @@ public class BaseRepository<T extends BaseEntity> {
     return savedEntity;
   }
 
+  public List<T> saveWithHistory(List<T> entities) {
+    final var ids = entities.stream().map(BaseEntity::getRecordId).collect(Collectors.toList());
+    if (ids.isEmpty()) {
+      return new ArrayList<>();
+    }
+
+    final var historyEntries =
+        findByIds(ids).stream()
+            .map(
+                entity -> {
+                  entity.setId(new ObjectId());
+                  return entity;
+                })
+            .collect(Collectors.toList());
+
+    getHistoryCollection().insertMany(historyEntries);
+
+    entities.forEach(entity -> entity.setModifiedAt(Instant.now().getEpochSecond()));
+    final var savedEntities = morphia.datastore().save(entities);
+    logger.debug("history save entities {}", savedEntities);
+
+    return savedEntities;
+  }
+
   public T save(T entity) {
     entity.setModifiedAt(Instant.now().getEpochSecond());
 
@@ -195,7 +225,7 @@ public class BaseRepository<T extends BaseEntity> {
     entities.forEach(entity -> entity.setModifiedAt(timestamp));
 
     final var savedEntities = morphia.datastore().save(entities);
-    logger.debug("saved entities{}", savedEntities);
+    logger.debug("save entities {}", savedEntities);
 
     return savedEntities;
   }
