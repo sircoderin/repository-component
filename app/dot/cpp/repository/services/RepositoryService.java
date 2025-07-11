@@ -103,8 +103,7 @@ public class RepositoryService {
   public void emptyCollection(Class<? extends BaseEntity> entity) {
     try (final var mongoClient = new MongoClient(mongoUri)) {
       final var db = getDatabase(mongoClient);
-      db.getCollection(entity.getSimpleName()).drop();
-      createCollections(db, false, entity);
+      db.getCollection(entity.getSimpleName()).deleteMany(new Document());
     }
   }
 
